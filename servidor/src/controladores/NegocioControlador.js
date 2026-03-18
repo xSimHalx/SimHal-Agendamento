@@ -55,4 +55,4 @@ const NegocioControlador = {
   }
 };
 
-module.export
+module.exports = NegocioControlador;

@@ -2,7 +2,12 @@
   "name": "simhal-agendamento-root",
   "version": "1.0.0",
   "description": "Projeto SimHal Agendamento - Root",
+  "workspaces": [
+    "interface",
+    "servidor"
+  ],
   "scripts": {
+    "build": "npm run build --workspace=interface",
     "dev:servidor": "npm run dev --prefix servidor",
     "dev:interface": "npm run dev --prefix interface",
     "dev": "npx concurrently \"npm run dev:servidor\" \"npm run dev:interface\""

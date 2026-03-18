@@ -3,7 +3,7 @@ import axios from 'axios';
 import { 
   TrendingUp, Users, Calendar, DollarSign, 
   ArrowUpRight, ArrowDownRight, Clock, 
-  MoreVertical, Plus, Zap, AlertCircle, Target, Loader2
+  MoreVertical, Plus, Zap, AlertCircle, Target, Loader2, Edit
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
@@ -353,4 +353,60 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
 
           {/* Novo card de Insight Rápido */}
           <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-2xl text-white shadow-lg shadow-indigo-100 flex flex-col justify-between">
-             <div className="flex justify
+             <div className="flex justify-between items-start">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <TrendingUp size={24} />
+                </div>
+                <button className="text-white/60 hover:text-white transition-colors">
+                  <MoreVertical size={20} />
+                </button>
+             </div>
+             <div>
+                <h3 className="text-lg font-bold mb-1">Dica de Performance</h3>
+                <p className="text-sm text-indigo-100/80 mb-4">Seu serviço mais lucrativo é <b>{distribuicaoServicos?.[0]?.name || '...'}</b>. Considere criar uma promoção para horários de baixa demanda.</p>
+                <button className="w-full py-2 bg-white text-indigo-600 rounded-xl font-bold text-sm shadow-md hover:bg-slate-50 active:scale-95 transition-all">
+                  Ver Estratégias
+                </button>
+             </div>
+          </div>
+        </div>
+    </div>
+  );
+}
+
+function KPICard({ titulo, valor, subtitulo, tendencia, valorTendencia, icone, cor }) {
+  const cores = {
+    emerald: 'bg-emerald-50 text-emerald-600',
+    indigo: 'bg-indigo-50 text-indigo-600',
+    blue: 'bg-blue-50 text-blue-600',
+    amber: 'bg-amber-50 text-amber-600',
+  };
+
+  return (
+    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between mb-3 text-slate-400">
+        <div className={`p-2.5 rounded-xl ${cores[cor]}`}>
+          {icone}
+        </div>
+        <button className="hover:text-slate-600 transition-colors">
+          <MoreVertical size={18} />
+        </button>
+      </div>
+      <div>
+        <p className="text-sm font-medium text-slate-500">{titulo}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-2xl font-black text-slate-800">{valor}</p>
+          {tendencia !== 'neutral' && (
+            <span className={`flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tendencia === 'up' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+              {tendencia === 'up' ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+              {valorTendencia}
+            </span>
+          )}
+        </div>
+        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tight">
+          {subtitulo}
+        </p>
+      </div>
+    </div>
+  );
+}
