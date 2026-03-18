@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db-simhal:
+    image: postgres:15
+    container_name: simhal-db
+    restart: always
+    environment:
+      POSTGRES_USER: simhal_user
+      POSTGRES_PASSWORD: simhal_password
+      POSTGRES_DB: simhal_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+networks:
+  default:
+    name: simhal-network

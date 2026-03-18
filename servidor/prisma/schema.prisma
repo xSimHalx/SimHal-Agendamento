@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Empresa {
+  id               String        @id @default(uuid())
+  nome             String
+  slug             String        @unique
+  logo             String?
+  telefone         String?
+  corPrimaria      String?       @default("indigo")
+  endereco         String?
+  instagram        String?
+  facebook         String?
+  planoAtual       String        @default("TRIAL")
+  statusAssinatura String        @default("ATIVO")
+  dataVencimento   DateTime?
+  criadoEm         DateTime      @default(now())
+  atualizadoEm     DateTime      @updatedAt
+  adicionais       Adicional[]
+  agendamentos     Agendamento[]
+  clientes         Cliente[]
+  servicos         Servico[]
+  transacoes       Transacao[]
+  usuarios         Usuario[]
+  horarioFuncionamento Json?
+  metaMensal      Int           @default(5000)
+  bloqueios        BloqueioAgenda[]
+
+  @@map("empresas")
+}
+
+model Usuario {
+  id                 String        @id @default(uuid())
+  nome               String
+  email              String        @unique
+  telefone           String?       @unique
+  senha              String
+  role               RoleUsuario   @default(DONO)
+  isProfissional     Boolean       @default(false)
+  horariosDeTrabalho Json?
+  foto               String?
+  empresaId          String
+  criadoEm           DateTime      @default(now())
+  atualizadoEm       DateTime      @updatedAt
+  agendamentos       Agendamento[]
+  transacoes         Transacao[]
+  bloqueios          BloqueioAgenda[]
+  empresa            Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@map("usuarios")
+}
+
+model Servico {
+  id           String        @id @default(uuid())
+  nome         String
+  descricao    String?
+  duracao      Int
+  preco        Int
+  ativo        Boolean       @default(true)
+  empresaId    String
+  agendamentos Agendamento[]
+  empresa      Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@map("servicos")
+}
+
+model Cliente {
+  id           String        @id @default(uuid())
+  nome         String
+  sobrenome    String?
+  telefone     String
+  email        String?
+  notas        String?
+  empresaId    String
+  criadoEm     DateTime      @default(now())
+  atualizadoEm DateTime      @updatedAt
+  agendamentos Agendamento[]
+  empresa      Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@map("clientes")
+}
+
+model Agendamento {
+  id             String            @id @default(uuid())
+  dataHora       DateTime
+  status         StatusAgendamento @default(PENDENTE)
+  valorTotal     Int
+  empresaId      String
+  clienteId      String
+  profissionalId String
+  servicoId      String
+  criadoEm       DateTime          @default(now())
+  atualizadoEm   DateTime          @updatedAt
+  cliente        Cliente           @relation(fields: [clienteId], references: [id])
+  empresa        Empresa           @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  profissional   Usuario           @relation(fields: [profissionalId], references: [id])
+  servico        Servico           @relation(fields: [servicoId], references: [id])
+  transacao      Transacao?
+  adicionais     Adicional[]       @relation("AdicionalToAgendamento")
+
+  @@map("agendamentos")
+}
+
+model Adicional {
+  id           String        @id @default(uuid())
+  nome         String
+  descricao    String?
+  preco        Int
+  ativo        Boolean       @default(true)
+  empresaId    String
+  empresa      Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  agendamentos Agendamento[] @relation("AdicionalToAgendamento")
+
+  @@map("adicionais")
+}
+
+model Transacao {
+  id            String        @id @default(uuid())
+  tipo          TipoTransacao
+  categoria     String
+  descricao     String
+  valor         Int
+  data          DateTime      @default(now())
+  empresaId     String
+  responsavelId String?
+  agendamentoId String?       @unique
+  criadoEm      DateTime      @default(now())
+  agendamento   Agendamento?  @relation(fields: [agendamentoId], references: [id])
+  empresa       Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  responsavel   Usuario?      @relation(fields: [responsavelId], references: [id])
+
+  @@map("transacoes")
+}
+
+enum RoleUsuario {
+  ADMIN
+  DONO
+  RECEPCIONISTA
+  PROFISSIONAL
+}
+
+enum StatusAgendamento {
+  PENDENTE
+  CONFIRMADO
+  CONCLUIDO
+  CANCELADO
+  NOSHOW
+}
+
+enum TipoTransacao {
+  ENTRADA
+  SAIDA
+}
+
+model BloqueioAgenda {
+  id             String   @id @default(uuid())
+  empresaId      String
+  profissionalId String?  // Se nulo, bloqueia a loja toda
+  inicio         DateTime
+  fim            DateTime
+  motivo         String?
+  recorrente     Boolean  @default(false)
+  empresa        Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  profissional   Usuario? @relation(fields: [profissionalId], references: [id], onDelete: SetNull)
+
+  @@map("bloqueios_agenda")
+}
