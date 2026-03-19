@@ -46,7 +46,7 @@ const NegocioControlador = {
         'exigirPagamentoAntecipado', 'autoLembrete',
         'autoAniversario', 'autoAvaliacao', 'autoBloqueioFalta', 'customLabels',
         'whatsappApiUrl', 'whatsappApiToken', 'whatsappInstanceName', 
-        'msgBoasVindasAtiva', 'msgLembreteAtiva'
+        'msgBoasVindasAtiva', 'msgLembreteAtiva', 'metaMensal'
       ];
 
       const dadosParaAtualizar = {};

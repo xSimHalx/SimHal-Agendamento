@@ -299,6 +299,15 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <PieChart>
+                  <text
+                    x="50%"
+                    y="50%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-800 font-black text-xl"
+                  >
+                    {distribuicaoServicos?.reduce((acc, curr) => acc + curr.value, 0) || 0}
+                  </text>
                   <Pie
                     data={distribuicaoServicos}
                     cx="50%"
@@ -315,7 +324,17 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
                   <Tooltip 
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                   />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36} 
+                    iconType="circle" 
+                    wrapperStyle={{ fontSize: '11px', fontWeight: 'bold' }} 
+                    formatter={(value, entry) => (
+                      <span className="text-slate-600">
+                        {value}: <span className="text-indigo-600 font-black">{entry.payload.value}</span>
+                      </span>
+                    )}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
