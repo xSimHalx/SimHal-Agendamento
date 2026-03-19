@@ -48,35 +48,7 @@ async function main() {
 
   console.log('Admin Principal criado.');
 
-  // 3. Criar um Profissional (além do admin)
-  const profissional = await prisma.usuario.upsert({
-    where: { email: 'profissional@simhal.com' },
-    update: { isProfissional: true },
-    create: {
-      nome: 'Carlos Profissional',
-      email: 'profissional@simhal.com',
-      senha: bcrypt.hashSync('123', 10),
-      role: 'PROFISSIONAL',
-      isProfissional: true,
-      empresaId: empresa.id
-    }
-  });
-  console.log('Profissional de teste criado.');
-
-  // 4. Criar um Serviço
-  const servico = await prisma.servico.create({
-    data: {
-      nome: 'Corte Moderno',
-      descricao: 'Corte de cabelo com lavagem e finalização.',
-      duracao: 30,
-      preco: 5000, // R$ 50,00
-      empresaId: empresa.id,
-      ativo: true
-    }
-  });
-  console.log('Serviço de teste criado.');
-
-  console.log('Seed finalizado com sucesso!');
+  console.log('Seed finalizado com sucesso! (Apenas Admin e Empresa criados)');
 }
 
 main()

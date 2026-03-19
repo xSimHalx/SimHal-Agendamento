@@ -36,24 +36,56 @@ import OnboardingTour from '../componentes/Onboarding/OnboardingTour';
 
 const CONFIG_ONBOARDING = {
   painel: [
-    { titulo: 'Bem-vindo ao SimHal!', texto: 'Este é o seu centro de comando. Aqui você vê um resumo rápido de como está o seu negócio hoje.' },
-    { titulo: 'Métricas de Hoje', texto: 'Acompanhe quantos agendamentos você tem e seu faturamento previsto no topo da tela.' }
+    { 
+      titulo: 'Dashboard Inteligente', 
+      texto: 'Seja bem-vindo ao seu novo centro de comando! Aqui você tem uma visão 360º do seu negócio, com faturamento e agendamentos em tempo real.',
+      icone: <LayoutDashboard size={28} />
+    },
+    { 
+      titulo: 'Análise de Saúde', 
+      texto: 'Acompanhe as métricas de hoje no topo. Se os números estiverem azuis, seu dia está sendo um sucesso!',
+      icone: <BarChart3 size={28} />
+    }
   ],
   agenda: [
-    { titulo: 'Sua Agenda Viva', texto: 'Aqui você gerencia todos os horários. Clique em um agendamento para ver detalhes ou editar.' },
-    { titulo: 'Status das Vagas', texto: 'Fique de olho nas cores: elas indicam se o cliente já confirmou ou se o horário ainda está pendente.' }
+    { 
+      titulo: 'Sua Agenda Viva', 
+      texto: 'Gerencie seus horários com cliques simples. Você pode arrastar, editar ou cancelar agendamentos em segundos para manter tudo organizado.',
+      icone: <CalendarDays size={28} />
+    },
+    { 
+      titulo: 'Status Visual', 
+      texto: 'Cada cor tem um significado: Verde para confirmados, Amarelo para pendentes e Vermelho para cancelados. Praticidade total!',
+      icone: <Zap size={28} />
+    }
   ],
   clientes: [
-    { titulo: 'Gestão de Clientes', texto: 'Tenha o histórico completo de cada pessoa. Você pode ver quantas vezes ela veio e o que ela costuma pedir.' }
+    { 
+      titulo: 'Base de Fãs', 
+      texto: 'Transforme clientes em clientes fiéis. Acesse o histórico, preferências e frequência de cada pessoa para oferecer um atendimento VIP.',
+      icone: <Users size={28} />
+    }
   ],
   servicos: [
-    { titulo: 'Seu Cardápio', texto: 'Cadastre todos os seus serviços aqui. Lembre-se de colocar fotos bonitas para atrair mais clientes!' }
+    { 
+      titulo: 'Cardápio Premium', 
+      texto: 'Seus serviços são sua vitrine. Cadastre preços, durações e adicione fotos para que seu link de agendamento brilhe para os clientes.',
+      icone: <Briefcase size={28} />
+    }
   ],
   financeiro: [
-    { titulo: 'Controle de Caixa', texto: 'Não perca nenhum centavo! Registre entradas e saídas para ter um fechamento de mês perfeito.' }
+    { 
+      titulo: 'Gestão de Lucro', 
+      texto: 'Tenha controle total sobre o que entra e o que sai. O SimHal calcula automaticamente seu lucro real, descontando as despesas cadastradas.',
+      icone: <DollarSign size={28} />
+    }
   ],
   integracoes: [
-    { titulo: 'Poder de Automação', texto: 'Conecte seu WhatsApp e configure seu Pix para automação total. Menos trabalho manual, mais lucro!' }
+    { 
+      titulo: 'Mais Produtividade', 
+      texto: 'Conecte seu WhatsApp para enviar lembretes automáticos e configure o Pix para receber pagamentos antes mesmo do cliente chegar!',
+      icone: <LinkIcon size={28} />
+    }
   ]
 };
 

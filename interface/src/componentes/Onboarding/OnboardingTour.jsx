@@ -38,23 +38,26 @@ const OnboardingTour = ({ abaAtiva, config }) => {
       <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300">
         
         {/* Header Colorido/Premium */}
-        <div className="h-24 bg-gradient-to-br from-primary to-primary/80 relative overflow-hidden flex items-center px-8">
+        <div 
+          className="h-32 bg-gradient-to-br from-[#4f46e5] to-[#7c3aed] relative overflow-hidden flex items-center px-8"
+          style={{ background: 'linear-gradient(135deg, var(--cor-primaria, #4f46e5) 0%, var(--cor-secundaria, #7c3aed) 100%)' }}
+        >
            <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
            <div className="absolute bottom-[-10px] left-[-10px] w-24 h-24 bg-white/5 rounded-full blur-xl" />
            
-           <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white mr-4 shadow-inner">
-              <Sparkles size={24} />
+           <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white mr-4 shadow-xl border border-white/30">
+              {step.icone || <Sparkles size={28} />}
            </div>
            <div>
-              <h4 className="text-white font-black uppercase tracking-widest text-[10px] opacity-70">Dica Express</h4>
-              <h3 className="text-white font-black text-lg leading-tight uppercase tracking-tight">{step.titulo}</h3>
+              <h4 className="text-white/70 font-black uppercase tracking-[0.2em] text-[10px]">Dica Express</h4>
+              <h3 className="text-white font-black text-xl leading-tight uppercase tracking-tight shadow-sm">{step.titulo}</h3>
            </div>
            
            <button 
             onClick={fechar}
-            className="ml-auto w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:rotate-90 shadow-lg border border-white/10"
            >
-              <X size={20} />
+              <X size={18} strokeWidth={3} />
            </button>
         </div>
 

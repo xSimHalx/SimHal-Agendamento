@@ -68,6 +68,7 @@ export default function AgendamentoCliente() {
   // Checkout
   const [pagamento, setPagamento] = useState(null);
   const [carregandoPagamento, setCarregandoPagamento] = useState(false);
+  const [resumoAberto, setResumoAberto] = useState(false);
 
   const CORES_TEMA = {
     indigo: { primary: '#4f46e5', secondary: '#4338ca', light: '#eef2ff' },
@@ -569,8 +570,8 @@ export default function AgendamentoCliente() {
                          <Loader2 size={24} className="text-primary animate-spin" />
                       </div>
                     )}
-                    {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(d => (
-                      <div key={d} className="text-[10px] font-black text-slate-300 tracking-widest">{d}</div>
+                    {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, idx) => (
+                      <div key={`${d}-${idx}`} className="text-[10px] font-black text-slate-300 tracking-widest">{d}</div>
                     ))}
                     
                     {Array.from({ length: getDay(startOfMonth(mesReferencia)) }).map((_, i) => (
@@ -909,8 +910,6 @@ export default function AgendamentoCliente() {
   };
 
   const tema = CORES_TEMA[empresa?.corPrimaria] || CORES_TEMA.indigo;
-
-  const [resumoAberto, setResumoAberto] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-0 sm:p-4 lg:p-8 font-sans selection:bg-primary/20" style={{ backgroundImage: 'radial-gradient(circle at top right, #1e293b 0%, #020617 100%)' }}>
