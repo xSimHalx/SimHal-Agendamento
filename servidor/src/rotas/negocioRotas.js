@@ -103,5 +103,6 @@ rotas.delete('/campos-formulario/:id', CampoFormularioControlador.excluir);
 rotas.get('/whatsapp/qrcode/:empresaId', WhatsAppControlador.gerarQrCode);
 rotas.get('/whatsapp/status/:empresaId', WhatsAppControlador.verificarStatus);
 rotas.delete('/whatsapp/desconectar/:empresaId', WhatsAppControlador.desconectar);
+rotas.post('/whatsapp/teste', WhatsAppControlador.testeEnvio);
 
 module.exports = rotas;

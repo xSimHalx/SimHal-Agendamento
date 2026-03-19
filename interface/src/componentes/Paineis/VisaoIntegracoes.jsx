@@ -87,6 +87,21 @@ export default function VisaoIntegracoes({ empresaId }) {
         }
     };
 
+    const handleTesteEnvio = async () => {
+        const numero = window.prompt("Digite o número para o teste (com DDD):");
+        if (!numero) return;
+
+        setEstaSalvando(true);
+        try {
+            await axios.post(`${API_BASE}/whatsapp/teste`, { empresaId, numero });
+            alert("Mensagem de teste enviada! Verifique seu WhatsApp.");
+        } catch (erro) {
+            alert("Erro ao enviar teste. Verifique se o servidor Evolution API está rodando e conectado.");
+        } finally {
+            setEstaSalvando(false);
+        }
+    };
+
     const salvarToggles = async () => {
         try {
             await axios.put(`${API_BASE}/info/${empresaId}`, form);
@@ -164,12 +179,21 @@ export default function VisaoIntegracoes({ empresaId }) {
                                 </div>
 
                                 {statusConexao === 'open' ? (
-                                    <button 
-                                        onClick={handleDesconectar}
-                                        className="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 px-6 py-3 rounded-2xl font-black text-xs transition-all flex items-center gap-2"
-                                    >
-                                        <XCircle size={18} /> Desconectar Aparelho
-                                    </button>
+                                    <div className="flex gap-3">
+                                        <button 
+                                            onClick={handleDesconectar}
+                                            className="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 px-6 py-3 rounded-2xl font-black text-xs transition-all flex items-center gap-2"
+                                        >
+                                            <XCircle size={18} /> Desconectar
+                                        </button>
+                                        <button 
+                                            onClick={handleTesteEnvio}
+                                            disabled={estaSalvando}
+                                            className="bg-white/10 hover:bg-white/20 border border-white/10 text-white px-6 py-3 rounded-2xl font-black text-xs transition-all flex items-center gap-2"
+                                        >
+                                            <Zap size={18} className="text-amber-400" /> {estaSalvando ? 'Enviando...' : 'Enviar Teste'}
+                                        </button>
+                                    </div>
                                 ) : (
                                     <button 
                                         onClick={handleGerarQr}
@@ -196,12 +220,17 @@ export default function VisaoIntegracoes({ empresaId }) {
                                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${form.msgBoasVindasAtiva ? 'left-7' : 'left-1'}`} />
                                 </button>
                             </div>
-                            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 opacity-50">
+                            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
                                 <div>
                                     <p className="text-xs font-black">Lembrete Automático (2h antes)</p>
                                     <p className="text-[10px] text-slate-500 font-medium">Reduza as faltas dos clientes</p>
                                 </div>
-                                <div className="bg-amber-400/20 text-amber-400 text-[8px] font-black px-2 py-0.5 rounded-md uppercase">Em breve</div>
+                                <button 
+                                    onClick={() => { setForm(f => ({...f, msgLembreteAtiva: !f.msgLembreteAtiva})); salvarToggles(); }}
+                                    className={`w-12 h-6 rounded-full relative transition-all ${form.msgLembreteAtiva ? 'bg-emerald-500' : 'bg-slate-700'}`}
+                                >
+                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${form.msgLembreteAtiva ? 'left-7' : 'left-1'}`} />
+                                </button>
                             </div>
                         </div>
                     </div>

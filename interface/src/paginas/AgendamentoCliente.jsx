@@ -316,111 +316,99 @@ export default function AgendamentoCliente() {
   // COMPONENTES DE LAYOUT (As 3 Colunas)
   // ==========================================
 
-  // 1. COLUNA ESQUERDA (Informativa)
+  // 1. COLUNA ESQUERDA / CABEÇALHO (Dinâmico Mobile/Desktop)
   const renderizarPainelEsquerdo = () => {
     const infoEtapa = {
-      1: { icone: Users, titulo: t.Profissional, desc: `Selecione o ${t.profissional} que deseja ser atendido.` },
-      2: { icone: BookOpen, titulo: t.Servico, desc: `Selecione o ${t.servico} que deseja agendar um horário.` },
-      3: { icone: ShoppingCart, titulo: `${t.Servicos} Adicionais`, desc: `Selecione ${t.servicos} adicionais caso queira incluir no ${t.agendamento}.` },
-      4: { icone: Clock, titulo: 'Data e Horário', desc: `Datas em verde possuem disponibilidade de horário para ${t.agendamento}.` },
-      5: { icone: Contact, titulo: 'Cadastro', desc: `Por favor, digite suas informações de contato para confirmarmos o ${t.agendamento}.` },
-      6: { icone: ShieldCheck, titulo: 'Pagamento', desc: 'Sua reserva está quase pronta! Realize o pagamento via PIX para garantir sua vaga.' },
-      7: { icone: Check, titulo: 'Concluído', desc: `Seu ${t.agendamento} foi realizado com sucesso!` }
+      1: { icone: Users, titulo: t.Profissional, desc: `Escolha quem vai te atender.` },
+      2: { icone: BookOpen, titulo: t.Servico, desc: `O que vamos fazer hoje?` },
+      3: { icone: ShoppingCart, titulo: `Adicionais`, desc: `Deseja algo mais?` },
+      4: { icone: Clock, titulo: 'Horário', desc: `Escolha o melhor momento.` },
+      5: { icone: Contact, titulo: 'Seus Dados', desc: `Quase lá! Só precisamos te identificar.` },
+      6: { icone: ShieldCheck, titulo: 'Pagamento', desc: 'Garanta sua vaga pelo PIX.' },
+      7: { icone: Check, titulo: 'Sucesso!', desc: `Agendamento confirmado.` }
     }[etapa];
 
     const Icone = infoEtapa.icone;
+    const porcentagemProgresso = (etapa / 6) * 100;
 
     return (
-      <div className="w-full lg:w-[280px] bg-[#f8f9fa] p-6 lg:p-8 flex flex-col items-center text-center border-b lg:border-r border-slate-200">
-        <div className="w-full flex justify-between items-center lg:hidden mb-6">
-          <button 
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-slate-400 hover:text-slate-800 font-bold text-[10px] uppercase tracking-widest transition-colors"
-          >
-            <ArrowLeft size={14} /> Lojas
-          </button>
-          <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5, 6].map(s => (
-              <div key={s} className={`w-1.5 h-1.5 rounded-full transition-colors ${s === etapa ? 'bg-primary' : 'bg-slate-300'}`} />
-            ))}
-          </div>
-        </div>
-
-        <button 
-          onClick={() => navigate('/')}
-          className="hidden lg:flex mb-8 items-center gap-2 text-slate-400 hover:text-slate-800 font-bold text-[11px] uppercase tracking-widest transition-colors group"
-        >
-          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-          Ver outras lojas
-        </button>
-
-        <div className="hidden lg:flex gap-2 mb-12">
-          {[1, 2, 3, 4, 5, 6].map(s => (
-            <div key={s} className={`w-2 h-2 rounded-full transition-colors ${s === etapa ? 'bg-primary' : 'bg-slate-300'}`} />
-          ))}
-        </div>
-        <div className="flex flex-col items-center flex-1">
-          {empresa.logo ? (
-            <img src={empresa.logo} alt={empresa.nome} className="w-20 h-20 object-contain mb-4 p-2 bg-white rounded-2xl shadow-sm border border-slate-100" />
-          ) : (
-            <Icone size={48} className="text-primary mb-6" strokeWidth={1.5} />
-          )}
-          <h2 className="text-xl font-bold text-slate-800 mb-2">{infoEtapa.titulo}</h2>
-          <p className="text-sm text-slate-500 leading-relaxed">{infoEtapa.desc}</p>
-        </div>
-
-        <div className="mt-auto pt-8 w-full border-t border-slate-200 space-y-4">
-          {empresa.endereco && (
-            <div className="text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center justify-center gap-1">
-                <MapPin size={10} /> Onde ficamos
-              </p>
-              <p className="text-[11px] font-bold text-slate-600 leading-tight px-2">{empresa.endereco}</p>
-            </div>
-          )}
-
-          <div className="flex justify-center gap-3">
-            {empresa.instagram && (
-              <a 
-                href={`https://instagram.com/${empresa.instagram}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/30 transition-all hover:scale-110"
-                title="Siga no Instagram"
-              >
-                <Instagram size={18} />
-              </a>
-            )}
-            {empresa.facebook && (
-              <a 
-                href={`https://facebook.com/${empresa.facebook}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/30 transition-all hover:scale-110"
-                title="Visite no Facebook"
-              >
-                <Facebook size={18} />
-              </a>
-            )}
-            {empresa.telefone && (
-              <a 
-                href={`https://wa.me/${empresa.telefone.replace(/\D/g, '')}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-emerald-500 hover:border-emerald-200 transition-all hover:scale-110"
-                title="Chamar no WhatsApp"
-              >
-                <Smartphone size={18} />
-              </a>
-            )}
+      <>
+        {/* HEADER MOBILE (Fixo no topo) */}
+        <div className="lg:hidden w-full bg-white border-b border-slate-100 p-4 sticky top-0 z-30 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+             <div className="flex items-center gap-3">
+                {empresa.logo ? (
+                  <img src={empresa.logo} alt={empresa.nome} className="w-10 h-10 object-contain rounded-xl border border-slate-100 p-1" />
+                ) : (
+                  <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                    <Check size={20} />
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-sm font-black text-slate-800 leading-tight">{empresa.nome}</h1>
+                  <p className="text-[10px] font-black text-primary uppercase tracking-widest">{infoEtapa.titulo} • Passo {etapa}/6</p>
+                </div>
+             </div>
+             <button onClick={() => navigate('/')} className="w-8 h-8 flex items-center justify-center text-slate-400">
+                <X size={20} />
+             </button>
           </div>
           
-          <div className="pt-2 text-center">
-            <p className="font-bold text-slate-800 text-[10px]">Dúvidas?</p>
-            <p className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Fale conosco pelas redes sociais!</p>
+          {/* Barra de Progresso Mobile */}
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+             <div 
+                className="h-full bg-primary transition-all duration-500 ease-out" 
+                style={{ width: `${porcentagemProgresso}%` }}
+             />
           </div>
         </div>
-      </div>
+
+        {/* PAINEL LATERAL DESKTOP */}
+        <div className="hidden lg:flex w-[280px] bg-[#f8f9fa] p-8 flex-col items-center text-center border-r border-slate-200">
+          <button 
+            onClick={() => navigate('/')}
+            className="mb-8 flex items-center gap-2 text-slate-400 hover:text-slate-800 font-bold text-[11px] uppercase tracking-widest transition-colors group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Lojas
+          </button>
+
+          <div className="w-full h-1 bg-slate-200 rounded-full mb-12 overflow-hidden">
+             <div className="h-full bg-primary transition-all duration-500" style={{ width: `${porcentagemProgresso}%` }} />
+          </div>
+
+          <div className="flex flex-col items-center flex-1">
+            {empresa.logo ? (
+              <img src={empresa.logo} alt={empresa.nome} className="w-24 h-24 object-contain mb-6 p-3 bg-white rounded-3xl shadow-sm border border-slate-100" />
+            ) : (
+              <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mb-6">
+                <Icone size={40} strokeWidth={2} />
+              </div>
+            )}
+            <h2 className="text-xl font-black text-slate-800 mb-2">{infoEtapa.titulo}</h2>
+            <p className="text-sm text-slate-500 leading-relaxed font-medium">{infoEtapa.desc}</p>
+          </div>
+
+          <div className="mt-auto pt-8 w-full border-t border-slate-200 space-y-4">
+            {empresa.endereco && (
+              <div className="text-center">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center justify-center gap-1">
+                  <MapPin size={10} /> Onde ficamos
+                </p>
+                <p className="text-[11px] font-bold text-slate-600 leading-tight px-2">{empresa.endereco}</p>
+              </div>
+            )}
+
+            <div className="flex justify-center gap-2">
+              {[empresa.instagram, empresa.facebook, empresa.telefone].filter(Boolean).map((social, i) => (
+                <div key={i} className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                  {i === 0 ? <Instagram size={16}/> : i === 1 ? <Facebook size={16}/> : <Smartphone size={16}/>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </>
     );
   };
 
@@ -450,126 +438,139 @@ export default function AgendamentoCliente() {
 
     return (
       <div className="flex-1 flex flex-col bg-white min-h-[450px] lg:h-[600px]">
-        <div className="px-8 py-5 border-b border-slate-200 flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-800">{titulos[etapa]}</h2>
-          <button className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+        <div className="hidden lg:flex px-8 py-6 border-b border-slate-200 justify-between items-center bg-white/50 backdrop-blur-sm">
+          <h2 className="text-lg font-black text-slate-800 tracking-tight">{titulos[etapa]}</h2>
+          <button onClick={() => navigate('/')} className="text-slate-300 hover:text-slate-600 transition-colors">
+            <X size={20} />
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-10 py-6 sm:py-10 custom-scrollbar">
           
           {etapa === 1 && (
-            <div className="grid grid-cols-2 sm:flex sm:justify-center gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 pb-20 lg:pb-0">
                 {Array.isArray(profissionais) && profissionais.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => { setProfissionalSelecionado(p); proximaEtapa(); }}
-                    className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all ${
+                    className={`group relative flex flex-col items-center p-5 rounded-[2rem] border-2 transition-all duration-300 ${
                       profissionalSelecionado?.id === p.id 
-                        ? 'border-primary bg-[var(--cor-light)]' 
-                        : 'border-slate-100 hover:border-primary bg-white'
+                        ? 'border-primary bg-primary/5 shadow-xl shadow-primary/10' 
+                        : 'border-slate-100 hover:border-slate-300 bg-white hover:bg-slate-50'
                     }`}
                   >
-                    <div className="w-16 h-16 rounded-full bg-slate-200 mb-3 overflow-hidden">
+                    <div className={`w-20 h-20 rounded-[1.5rem] bg-slate-100 mb-4 overflow-hidden relative transition-transform duration-300 group-hover:scale-105 ${profissionalSelecionado?.id === p.id ? 'ring-4 ring-primary/20' : ''}`}>
                       {p.foto ? (
                         <img src={p.foto} alt={p.nome} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-[var(--cor-light)] text-primary font-bold text-xl">
+                        <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-black text-2xl uppercase">
                           {p.nome?.charAt(0) || '?'}
                         </div>
                       )}
                     </div>
-                    <span className="font-bold text-slate-800 text-sm sm:text-base">{p.nome}</span>
+                    <span className="font-black text-slate-800 text-sm sm:text-base mb-1">{p.nome}</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{p.cargo || t.Profissional}</span>
+                    
+                    {profissionalSelecionado?.id === p.id && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center scale-110 animate-in zoom-in-50">
+                        <Check size={14} strokeWidth={3} />
+                      </div>
+                    )}
                   </button>
                 ))}
-                {(!Array.isArray(profissionais) || profissionais.length === 0) && (
-                  <p className="text-slate-500 py-8">Nenhum profissional disponível no momento.</p>
-                )}
             </div>
           )}
 
           {etapa === 2 && (
-            <div className="space-y-3">
+            <div className="space-y-4 pb-20 lg:pb-0">
                 {Array.isArray(servicos) && servicos.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => { setServicoSelecionado(s); proximaEtapa(); }}
-                    className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                    className={`w-full flex items-center gap-4 p-5 rounded-[2rem] border-2 transition-all duration-300 text-left relative overflow-hidden group ${
                       servicoSelecionado?.id === s.id 
-                        ? 'border-primary bg-[var(--cor-light)]' 
-                        : 'border-slate-100 hover:border-primary bg-white'
+                        ? 'border-primary bg-primary/5 shadow-xl shadow-primary/10' 
+                        : 'border-slate-100 hover:border-slate-300 bg-white'
                     }`}
                   >
-                    <div className="text-left">
-                      <p className="font-bold text-slate-800">{s.nome}</p>
-                      {s.descricao && <p className="text-sm text-slate-500">{s.descricao}</p>}
+                    <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-primary border border-slate-100 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                      <BookOpen size={24} />
                     </div>
-                    <span className="font-bold text-primary">{formatarMoeda(s.preco)}</span>
+                    <div className="flex-1">
+                      <h4 className="font-black text-slate-800 text-sm sm:text-base leading-tight mb-1">{s.nome}</h4>
+                      <div className="flex items-center gap-3">
+                         <span className="flex items-center gap-1 text-[11px] font-bold text-slate-400">
+                           <Clock size={12} /> {s.duracao} min
+                         </span>
+                         <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                         <span className="text-[11px] font-black text-primary uppercase tracking-wider">{formatarMoeda(s.preco)}</span>
+                      </div>
+                    </div>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${servicoSelecionado?.id === s.id ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
+                      <ArrowRight size={16} />
+                    </div>
                   </button>
                 ))}
-                {(!Array.isArray(servicos) || servicos.length === 0) && (
-                  <p className="text-slate-500 py-8">Nenhum serviço disponível.</p>
-                )}
             </div>
           )}
 
           {etapa === 3 && (
-            <div className="space-y-3">
+            <div className="space-y-3 pb-20 lg:pb-0">
                   {adicionais.map((ad) => (
                   <button
                     key={ad.id}
                     onClick={() => alternarAdicional(ad)}
-                    className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                    className={`w-full flex items-center justify-between p-5 rounded-[2rem] border-2 transition-all duration-300 ${
                       adicionaisSelecionados.find(a => a.id === ad.id)
-                        ? 'border-primary bg-[var(--cor-light)]' 
-                        : 'border-slate-100 hover:border-primary bg-white'
+                        ? 'border-primary bg-primary/5 shadow-lg' 
+                        : 'border-slate-100 hover:border-slate-300 bg-white'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${adicionaisSelecionados.find(a => a.id === ad.id) ? 'bg-primary border-primary' : 'border-slate-300'}`}>
-                        {adicionaisSelecionados.find(a => a.id === ad.id) && <Check size={14} className="text-white" />}
+                    <div className="flex items-center gap-4">
+                      <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${adicionaisSelecionados.find(a => a.id === ad.id) ? 'bg-primary border-primary scale-110' : 'border-slate-300'}`}>
+                        {adicionaisSelecionados.find(a => a.id === ad.id) && <Check size={16} className="text-white" strokeWidth={3} />}
                       </div>
                       <div className="text-left">
-                        <p className="font-bold text-slate-800">{ad.nome}</p>
-                        {ad.descricao && <p className="text-sm text-slate-500">{ad.descricao}</p>}
+                        <p className="font-black text-slate-800 text-sm">{ad.nome}</p>
+                        <p className="text-[10px] font-bold text-slate-400">{formatarMoeda(ad.preco)} • +{ad.duracao || 0} min</p>
                       </div>
                     </div>
-                    <span className="font-bold text-primary">+{formatarMoeda(ad.preco)}</span>
                   </button>
                 ))}
             </div>
           )}
 
           {etapa === 4 && (
-            <div className="animate-in fade-in h-full flex flex-col">
+            <div className="animate-in fade-in slide-in-from-bottom-4 h-full flex flex-col pb-24 lg:pb-0">
               {!dataSelecionada ? (
-                <>
-                  <div className="flex justify-between items-center mb-6 px-4">
+                <div className="bg-white rounded-[2.5rem] p-4 sm:p-6 border border-slate-100 shadow-sm">
+                  <div className="flex justify-between items-center mb-8 px-2">
                     <button 
                       onClick={() => setMesReferencia(subMonths(mesReferencia, 1))}
-                      className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors"
+                      className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 rounded-xl text-slate-400 transition-colors"
                       disabled={isBefore(startOfMonth(mesReferencia), startOfMonth(new Date()))}
                     >
                       <ChevronLeft size={20} />
                     </button>
-                    <h3 className="font-black text-slate-800 text-lg uppercase tracking-tight">
+                    <h3 className="font-black text-slate-800 text-sm uppercase tracking-[0.2em]">
                       {format(mesReferencia, "MMMM yyyy", { locale: ptBR })}
                     </h3>
                     <button 
                       onClick={() => setMesReferencia(addMonths(mesReferencia, 1))}
-                      className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors"
+                      className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 rounded-xl text-slate-400 transition-colors"
                     >
                       <ChevronLeft className="rotate-180" size={20} />
                     </button>
                   </div>
                   
-                  <div className="grid grid-cols-7 gap-y-2 gap-x-2 text-center mb-8 relative">
+                  <div className="grid grid-cols-7 gap-y-3 gap-x-2 text-center mb-4 relative">
                     {carregandoMes && (
-                      <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex items-center justify-center rounded-xl">
-                         <span className="text-xs font-bold text-slate-400 animate-pulse">Carregando mês...</span>
+                      <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-xl">
+                         <Loader2 size={24} className="text-primary animate-spin" />
                       </div>
                     )}
-                    {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map(d => (
-                      <div key={d} className="text-[10px] font-black text-slate-400 tracking-widest">{d}</div>
+                    {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(d => (
+                      <div key={d} className="text-[10px] font-black text-slate-300 tracking-widest">{d}</div>
                     ))}
                     
                     {Array.from({ length: getDay(startOfMonth(mesReferencia)) }).map((_, i) => (
@@ -587,48 +588,50 @@ export default function AgendamentoCliente() {
                       const status = disponibilidadeMensal[dataStrFormat];
                       
                       let corDot = 'bg-slate-200';
-                      if (status === 'disponivel') corDot = 'bg-emerald-400';
-                      if (status === 'lotado') corDot = 'bg-rose-400';
-                      if (status === 'fechado' || passado) corDot = 'bg-slate-200';
+                      if (status === 'disponivel') corDot = 'bg-emerald-500';
+                      if (status === 'lotado') corDot = 'bg-rose-500';
 
                       return (
                         <button 
                           key={dia.toISOString()}
                           disabled={passado || status === 'fechado' || status === 'lotado'}
                           onClick={() => { setDataSelecionada(dia); setHorarioSelecionado(null); }}
-                          className={`h-10 w-10 mx-auto rounded-xl font-bold flex flex-col items-center justify-center transition-all relative ${
-                            selecionado ? 'bg-primary text-white shadow-lg scale-110 z-10' : 
-                            !passado && status === 'disponivel' ? 'bg-white hover:bg-[var(--cor-light)] text-slate-700 hover:text-primary border border-slate-100' : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-60 text-xs shadow-none border-none'
+                          className={`h-11 w-11 mx-auto rounded-[1.2rem] font-black flex flex-col items-center justify-center transition-all relative ${
+                            selecionado ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-110 z-10' : 
+                            !passado && status === 'disponivel' ? 'bg-slate-50 hover:bg-white hover:border-primary/30 text-slate-700 border border-slate-100' : 'bg-transparent text-slate-300 cursor-not-allowed opacity-40 text-xs'
                           }`}
                         >
-                          {format(dia, 'd')}
-                          {!passado && (status === 'disponivel' || status === 'lotado') && (
-                            <div className={`absolute bottom-1.5 w-3 h-1 rounded-full ${corDot}`}></div>
+                          <span className="text-[13px]">{format(dia, 'd')}</span>
+                          {!passado && status === 'disponivel' && (
+                            <div className={`absolute bottom-1.5 w-1 h-1 rounded-full ${selecionado ? 'bg-white' : corDot}`}></div>
                           )}
                         </button>
                       )
                     })}
                   </div>
-                </>
+                </div>
               ) : (
-                <div className="flex-1 flex flex-col animate-in slide-in-from-right-4">
-                  <div className="flex items-center justify-between border-b border-dashed border-slate-200 pb-4 mb-6">
+                <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-right-4">
+                  <div className="flex items-center justify-between mb-8">
                     <button 
                       onClick={() => { setDataSelecionada(null); setHorarioSelecionado(null); }}
-                      className="text-[10px] font-black uppercase text-slate-500 hover:text-slate-800 flex items-center gap-1 bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded-lg transition-colors border border-slate-200"
+                      className="text-[10px] font-black uppercase text-primary hover:bg-primary/5 px-4 py-2.5 rounded-xl transition-colors border border-primary/20 flex items-center gap-2"
                     >
-                      <ChevronLeft size={14} /> Voltar ao Calendário
+                      <ChevronLeft size={14} strokeWidth={3} /> Calendário
                     </button>
-                    <p className="text-right text-xs font-black text-slate-600 uppercase tracking-widest pl-2">
-                      {format(dataSelecionada, "dd/MM/yyyy")}
-                    </p>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dia Selecionado</p>
+                      <p className="text-sm font-black text-slate-800">
+                        {format(dataSelecionada, "dd 'de' MMMM", { locale: ptBR })}
+                      </p>
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-3 overflow-y-auto pr-2 custom-scrollbar pb-4" style={{ maxHeight: '350px' }}>
+                  <div className="grid grid-cols-3 gap-3">
                     {carregandoHorarios ? (
                       <div className="col-span-3 py-10 flex flex-col items-center justify-center text-slate-400 animate-pulse">
-                        <Clock size={24} className="mb-2 text-slate-300" />
-                        <p className="font-bold text-sm">Buscando horários...</p>
+                        <Loader2 size={24} className="text-primary animate-spin mb-3" />
+                        <p className="font-bold text-xs">Sincronizando agenda...</p>
                       </div>
                     ) : horariosDisponiveis.length > 0 ? (
                       horariosDisponiveis.map(slot => {
@@ -640,25 +643,28 @@ export default function AgendamentoCliente() {
                           <button
                             key={horaTexto}
                             onClick={() => setHorarioSelecionado(horaTexto)}
-                            className={`flex flex-col items-center justify-center p-3 rounded-xl font-bold transition-all border ${
+                            className={`flex flex-col items-center justify-center py-4 rounded-2xl font-black transition-all border-2 ${
                               selecionado 
-                              ? 'bg-primary text-white shadow-lg scale-105 border-primary/20' 
-                              : 'bg-white text-slate-600 hover:bg-[var(--cor-light)] hover:text-primary border-slate-200 shadow-sm'
+                              ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20 scale-105' 
+                              : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300'
                             }`}
                           >
                             <span className="text-sm">{horaTexto}</span>
-                            {isObject && slot.vagasRestantes !== undefined && (
-                              <span className={`text-[9px] uppercase font-black mt-1 ${selecionado ? 'text-white/80' : 'text-slate-400'}`}>
-                                {slot.vagasRestantes} {slot.vagasRestantes === 1 ? 'vaga' : 'vagas'}
+                            {isObject && slot.vagasRestantes > 1 && (
+                              <span className={`text-[8px] uppercase font-black mt-1 ${selecionado ? 'text-white/60' : 'text-primary'}`}>
+                                {slot.vagasRestantes} Vagas
                               </span>
                             )}
                           </button>
                         );
                       })
                     ) : (
-                      <div className="col-span-3 py-10 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl bg-slate-50 flex flex-col items-center gap-2">
-                        <CalendarIcon size={24} className="text-slate-300" />
-                        <p className="text-xs">Agenda cheia ou fechada.</p>
+                      <div className="col-span-3 py-16 text-center text-slate-400 border-2 border-dashed border-slate-100 rounded-[2.5rem] bg-slate-50 flex flex-col items-center gap-3">
+                        <CalendarIcon size={32} strokeWidth={1.5} className="text-slate-200" />
+                        <div className="space-y-1">
+                          <p className="font-black text-slate-800 text-sm">Nenhum horário livre</p>
+                          <p className="text-[10px] uppercase font-bold text-slate-400 px-8">Tente outra data no calendário ou entre em contato.</p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -666,57 +672,64 @@ export default function AgendamentoCliente() {
               )}
             </div>
           )}
+
           {etapa === 5 && (
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Primeiro Nome</label>
+            <div className="space-y-6 pb-24 lg:pb-0 animate-in fade-in slide-in-from-bottom-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="group">
+                  <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest pl-1">Seu Nome</label>
                   <input 
                     type="text" 
+                    placeholder="Ex: João"
                     value={dadosCliente.nome}
                     onChange={(e) => setDadosCliente({...dadosCliente, nome: e.target.value})}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-[var(--cor-light)] outline-none transition-all font-medium text-slate-800"
+                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all font-bold text-slate-800 placeholder:text-slate-300"
                   />
                 </div>
-                <div className="flex-1">
-                  <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Sobrenome</label>
+                <div className="group">
+                  <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest pl-1">Sobrenome</label>
                   <input 
                     type="text" 
+                    placeholder="Ex: Silva"
                     value={dadosCliente.sobrenome}
                     onChange={(e) => setDadosCliente({...dadosCliente, sobrenome: e.target.value})}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-[var(--cor-light)] outline-none transition-all font-medium text-slate-800"
+                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all font-bold text-slate-800 placeholder:text-slate-300"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Digite seu Celular / WhatsApp</label>
-                <input 
-                  type="tel" 
-                  placeholder="(00) 00000-0000"
-                  value={dadosCliente.telefone}
-                  onChange={(e) => setDadosCliente({...dadosCliente, telefone: e.target.value})}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-[var(--cor-light)] outline-none transition-all font-medium text-slate-800"
-                />
+                <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest pl-1">Celular / WhatsApp</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Smartphone size={18} />
+                  </div>
+                  <input 
+                    type="tel" 
+                    placeholder="(00) 00000-0000"
+                    value={dadosCliente.telefone}
+                    onChange={(e) => setDadosCliente({...dadosCliente, telefone: e.target.value})}
+                    className="w-full pl-12 p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all font-bold text-slate-800 placeholder:text-slate-300"
+                  />
+                </div>
               </div>
 
-              {/* CAMPOS PERSONALIZADOS (DINÂMICOS) */}
               {camposFormulario.length > 0 && (
-                <div className="pt-4 border-t border-dashed border-slate-200 mt-4 space-y-4">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    <Plus size={10} /> Informações Adicionais
-                  </p>
+                <div className="pt-8 border-t border-dashed border-slate-200 mt-8 space-y-6">
+                  <h5 className="text-[11px] font-black text-slate-800 uppercase tracking-[0.1em] flex items-center gap-2">
+                    <Plus size={14} className="text-primary" /> Informações Complementares
+                  </h5>
                   <div className="grid grid-cols-1 gap-4">
                     {camposFormulario.map(campo => (
                       <div key={campo.id}>
-                        <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">
-                          {campo.label} {campo.obrigatorio && <span className="text-rose-400">*</span>}
+                        <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest pl-1">
+                          {campo.label} {campo.obrigatorio && <span className="text-rose-500">*</span>}
                         </label>
                         <input 
                           type={campo.tipo === 'NUMBER' ? 'number' : 'text'}
                           value={respostasExtras[campo.id] || ''}
                           onChange={(e) => setRespostasExtras({...respostasExtras, [campo.id]: e.target.value})}
-                          placeholder={campo.obrigatorio ? '(Obrigatório)' : ''}
-                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-[var(--cor-light)] outline-none transition-all font-medium text-slate-800"
+                          placeholder={campo.placeholder || (campo.obrigatorio ? 'Resposta obrigatória' : 'Sua resposta aqui...')}
+                          className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-primary focus:ring-0 outline-none transition-all font-bold text-slate-800 placeholder:text-slate-300 shadow-sm"
                         />
                       </div>
                     ))}
@@ -800,19 +813,34 @@ export default function AgendamentoCliente() {
         </div>
 
         {etapa < 7 && (
-          <div className="px-4 py-4 sm:px-8 sm:py-5 border-t border-slate-200 flex justify-between items-center bg-white sticky bottom-0 lg:relative z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none">
+          <div className="px-6 py-5 border-t border-slate-100 flex justify-between items-center bg-white/80 backdrop-blur-xl sticky bottom-0 lg:relative z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] lg:shadow-none animate-in fade-in slide-in-from-bottom-2">
             {(etapa > 1 && etapa !== 6) ? (
-              <button onClick={etapaAnterior} className="flex items-center text-slate-600 font-bold hover:text-slate-800 transition-colors text-xs sm:text-sm">
-                <ChevronLeft size={18} className="mr-1" /> Voltar
+              <button 
+                onClick={etapaAnterior} 
+                className="flex items-center gap-2 text-slate-400 font-black hover:text-slate-800 transition-all text-[11px] uppercase tracking-widest active:scale-95"
+              >
+                <ChevronLeft size={18} strokeWidth={3} /> Voltar
               </button>
-            ) : <div />}
+            ) : (
+               <div className="flex flex-col">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Total</p>
+                  <p className="text-lg font-black text-slate-800 leading-tight">{formatarMoeda(calcularTotal())}</p>
+               </div>
+            )}
 
             <button 
               disabled={proximoDesabilitado() || carregandoPagamento}
               onClick={etapa === 5 ? confirmarAgendamento : proximaEtapa} 
-              className="flex items-center bg-primary hover:brightness-110 disabled:bg-slate-300 text-white px-6 py-2.5 rounded-lg font-bold transition-colors shadow-lg"
+              className="group flex items-center bg-primary hover:brightness-110 disabled:grayscale disabled:opacity-30 text-white pl-8 pr-6 py-4 rounded-[2rem] font-black transition-all shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-95 text-xs uppercase tracking-[0.15em]"
             >
-              {carregandoPagamento ? <Loader2 className="animate-spin" size={18} /> : (etapa === 5 ? (empresa.exigirPagamentoAntecipado ? 'Ir para Pagamento' : 'Confirmar Reserva') : 'Próximo')} <ArrowRight size={18} className="ml-2" />
+              {carregandoPagamento ? (
+                <Loader2 className="animate-spin" size={18} />
+              ) : (
+                <>
+                  {etapa === 5 ? (empresa.exigirPagamentoAntecipado ? 'Ir para Pagamento' : 'Confirmar Reserva') : 'Próximo'}
+                  <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" strokeWidth={3} />
+                </>
+              )}
             </button>
           </div>
         )}
@@ -882,8 +910,76 @@ export default function AgendamentoCliente() {
 
   const tema = CORES_TEMA[empresa?.corPrimaria] || CORES_TEMA.indigo;
 
+  const [resumoAberto, setResumoAberto] = useState(false);
+
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-0 sm:p-4 lg:p-8 font-sans" style={{ backgroundImage: 'radial-gradient(circle at center, #334155 0%, #0f172a 100%)' }}>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-0 sm:p-4 lg:p-8 font-sans selection:bg-primary/20" style={{ backgroundImage: 'radial-gradient(circle at top right, #1e293b 0%, #020617 100%)' }}>
+      
+      {/* BOTÃO FLUTUANTE DE RESUMO (MOBILE) */}
+      {etapa > 1 && etapa < 7 && (
+        <button 
+          onClick={() => setResumoAberto(!resumoAberto)}
+          className="lg:hidden fixed right-6 bottom-24 z-40 bg-white text-slate-800 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center border-4 border-primary transition-all active:scale-90"
+        >
+          <ShoppingCart size={24} className={resumoAberto ? 'text-rose-500' : 'text-primary'} />
+        </button>
+      )}
+
+      {/* OVERLAY RESUMO MOBILE */}
+      {resumoAberto && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm p-6 flex flex-col justify-end animate-in fade-in">
+           <div className="bg-white rounded-[2.5rem] p-8 space-y-6 shadow-2xl border border-slate-100 animate-in slide-in-from-bottom-10">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs">Seu Agendamento</h3>
+                 <button onClick={() => setResumoAberto(false)} className="text-slate-400 p-2"><X size={24}/></button>
+              </div>
+              
+              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                {profissionalSelecionado && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase">{t.Profissional}</span>
+                    <span className="text-sm font-black text-slate-800">{profissionalSelecionado.nome}</span>
+                  </div>
+                )}
+                {servicoSelecionado && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase">{t.Servico}</span>
+                    <span className="text-sm font-black text-slate-800">{servicoSelecionado.nome}</span>
+                  </div>
+                )}
+                {adicionaisSelecionados.length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase">Adicionais</p>
+                    {adicionaisSelecionados.map(ad => (
+                       <div key={ad.id} className="flex justify-between text-xs font-bold text-slate-600">
+                          <span>+ {ad.nome}</span>
+                          <span>{formatarMoeda(ad.preco)}</span>
+                       </div>
+                    ))}
+                  </div>
+                )}
+                {dataSelecionada && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase">Data/Hora</span>
+                    <span className="text-sm font-black text-slate-800">{format(dataSelecionada, 'dd/MM')} {horarioSelecionado ? ` às ${horarioSelecionado}` : ''}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-6 border-t border-slate-100 flex justify-between items-center">
+                 <span className="font-black text-slate-400 text-[10px] uppercase tracking-widest">Total</span>
+                 <span className="text-2xl font-black text-primary">{formatarMoeda(calcularTotal())}</span>
+              </div>
+              
+              <button 
+                onClick={() => setResumoAberto(false)}
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest"
+              >
+                Fechar Resumo
+              </button>
+           </div>
+        </div>
+      )}
       
       <div className="bg-white rounded-none sm:rounded-xl shadow-2xl overflow-hidden flex flex-col lg:flex-row w-full max-w-[1000px] min-h-screen sm:min-h-0 lg:h-[650px] animate-in zoom-in-95 duration-300">
         <style dangerouslySetInnerHTML={{__html: `

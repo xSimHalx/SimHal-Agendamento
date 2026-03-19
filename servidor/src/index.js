@@ -33,5 +33,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORTA, () => {
-  console.log(`Servidor rodando na porta ${PORTA}`);
+  console.log(`Servidor rodando na porta ${PORTA}`); // Local DB port sync (5432)
 });

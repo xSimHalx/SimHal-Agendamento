@@ -32,6 +32,30 @@ import VisaoSuporte from '../componentes/Paineis/VisaoSuporte';
 import VisaoEmConstrucao from '../componentes/Paineis/VisaoEmConstrucao';
 
 import { useTermos } from '../hooks/useTermos';
+import OnboardingTour from '../componentes/Onboarding/OnboardingTour';
+
+const CONFIG_ONBOARDING = {
+  painel: [
+    { titulo: 'Bem-vindo ao SimHal!', texto: 'Este é o seu centro de comando. Aqui você vê um resumo rápido de como está o seu negócio hoje.' },
+    { titulo: 'Métricas de Hoje', texto: 'Acompanhe quantos agendamentos você tem e seu faturamento previsto no topo da tela.' }
+  ],
+  agenda: [
+    { titulo: 'Sua Agenda Viva', texto: 'Aqui você gerencia todos os horários. Clique em um agendamento para ver detalhes ou editar.' },
+    { titulo: 'Status das Vagas', texto: 'Fique de olho nas cores: elas indicam se o cliente já confirmou ou se o horário ainda está pendente.' }
+  ],
+  clientes: [
+    { titulo: 'Gestão de Clientes', texto: 'Tenha o histórico completo de cada pessoa. Você pode ver quantas vezes ela veio e o que ela costuma pedir.' }
+  ],
+  servicos: [
+    { titulo: 'Seu Cardápio', texto: 'Cadastre todos os seus serviços aqui. Lembre-se de colocar fotos bonitas para atrair mais clientes!' }
+  ],
+  financeiro: [
+    { titulo: 'Controle de Caixa', texto: 'Não perca nenhum centavo! Registre entradas e saídas para ter um fechamento de mês perfeito.' }
+  ],
+  integracoes: [
+    { titulo: 'Poder de Automação', texto: 'Conecte seu WhatsApp e configure seu Pix para automação total. Menos trabalho manual, mais lucro!' }
+  ]
+};
 
 const CORES_TEMA = {
   indigo: { primary: '#4f46e5', secondary: '#4338ca', gradient: 'from-indigo-600 to-indigo-800' },
@@ -265,6 +289,8 @@ export default function PainelAdmin() {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+      <OnboardingTour abaAtiva={abaAtiva} config={CONFIG_ONBOARDING} />
+      
       {/* Toast Animado Global do Painel */}
       {feedback.msg && (
         <div className="fixed top-6 left-1/2 -track-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-300">

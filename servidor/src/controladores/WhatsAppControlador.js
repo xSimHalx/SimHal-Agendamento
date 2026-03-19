@@ -91,6 +91,52 @@ const WhatsAppControlador = {
             console.error("Erro ao desconectar:", erro.message);
             return res.status(500).json({ erro: 'Erro ao desconectar aparelho.' });
         }
+    },
+
+    /**
+     * Envia uma mensagem de texto (Interno e API)
+     */
+    enviarMensagem: async (numero, texto, empresaId) => {
+        try {
+            const instanceName = `empresa_${empresaId.split('-')[0]}`;
+            
+            // Limpa o número (remove caracteres não numéricos)
+            const numeroLimpo = numero.replace(/\D/g, '');
+            // Garante o formato internacional (ex: 5511999999999)
+            const numeroFinal = numeroLimpo.startsWith('55') ? numeroLimpo : `55${numeroLimpo}`;
+
+            const response = await axios.post(`${API_URL}/message/sendText/${instanceName}`, {
+                number: numeroFinal,
+                options: {
+                    delay: 1200,
+                    presence: 'composing',
+                    linkPreview: false
+                },
+                textMessage: {
+                    text: texto
+                }
+            }, {
+                headers: { 'apikey': API_KEY }
+            });
+
+            return response.data;
+        } catch (erro) {
+            console.error("Erro ao enviar WhatsApp:", erro.response?.data || erro.message);
+            throw erro;
+        }
+    },
+
+    /**
+     * Rota de teste manual
+     */
+    testeEnvio: async (req, res) => {
+        try {
+            const { empresaId, numero } = req.body;
+            await WhatsAppControlador.enviarMensagem(numero, "Olá! Esta é uma mensagem de teste do seu sistema SimHal Agendamento. 🚀", empresaId);
+            return res.json({ mensagem: 'Mensagem enviada com sucesso!' });
+        } catch (erro) {
+            return res.status(500).json({ erro: 'Falha no envio do teste.', detalhe: erro.message });
+        }
     }
 };
 
