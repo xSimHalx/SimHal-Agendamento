@@ -35,6 +35,8 @@ export default function VisaoClientes({ empresa }) {
     email: '', 
     notas: '' 
   });
+  const [feedback, setFeedback] = useState({ tipo: null, msg: '' });
+  const [confirmacaoExclusao, setConfirmacaoExclusao] = useState(null);
 
   const carregarClientes = useCallback(async () => {
     if (!empresaId) return;
@@ -93,23 +95,27 @@ export default function VisaoClientes({ empresa }) {
       } else {
         await axios.post(API_URL, dados);
       }
+      setFeedback({ tipo: 'sucesso', msg: `${t.Cliente} salvo com sucesso!` });
       setModalAberto(false);
       carregarClientes();
     } catch (erro) {
-      alert("Erro ao salvar cliente.");
+      setFeedback({ tipo: 'erro', msg: 'Erro ao salvar cliente.' });
     } finally {
       setEstaSalvando(false);
+      setTimeout(() => setFeedback({ tipo: null, msg: '' }), 3000);
     }
   };
 
   const excluirCliente = async (id) => {
-    if (!window.confirm("Deseja excluir este cliente? Histórico também será afetado.")) return;
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await axios.delete(`${API_BASE}/${id}`);
+      setFeedback({ tipo: 'sucesso', msg: 'Cliente excluído.' });
       carregarClientes();
       if (clienteSelecionado?.id === id) setClienteSelecionado(null);
+      setConfirmacaoExclusao(null);
     } catch (erro) {
-      alert("Erro ao excluir.");
+      setFeedback({ tipo: 'erro', msg: 'Erro ao excluir.' });
+      setTimeout(() => setFeedback({ tipo: null, msg: '' }), 3000);
     }
   };
 
@@ -120,6 +126,32 @@ export default function VisaoClientes({ empresa }) {
 
   return (
     <div className="relative h-full flex flex-col gap-6 animate-in fade-in duration-700">
+      {/* Toast Animado */}
+      {feedback.msg && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-300">
+          <div className={`px-6 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-md ${feedback.tipo === 'sucesso' ? 'bg-emerald-500/90 text-white border-emerald-400' : 'bg-rose-500/90 text-white border-rose-400'}`}>
+            <BadgeCheck size={20} />
+            <span className="font-bold text-sm">{feedback.msg}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação Premium */}
+      {confirmacaoExclusao && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center animate-in zoom-in-95">
+            <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-500 mx-auto mb-6">
+              <Trash2 size={40} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 mb-2">Excluir {t.Cliente}?</h3>
+            <p className="text-slate-500 text-sm font-medium mb-8">Esta ação é permanente e removerá todo o histórico de agendamentos deste {t.cliente}.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmacaoExclusao(null)} className="flex-1 px-6 py-4 bg-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-200 transition-all text-xs uppercase tracking-widest">Cancelar</button>
+              <button onClick={() => excluirCliente(confirmacaoExclusao)} className="flex-1 px-6 py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-rose-100">Excluir</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
         <div>
@@ -329,7 +361,7 @@ export default function VisaoClientes({ empresa }) {
                   <Edit size={18} /> Editar {t.Cliente}
                 </button>
                 <button 
-                  onClick={() => excluirCliente(clienteSelecionado.id)}
+                  onClick={() => setConfirmacaoExclusao(clienteSelecionado.id)}
                   className="p-4 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 transition-all border border-red-100"
                 >
                   <Trash2 size={24} />
@@ -342,17 +374,18 @@ export default function VisaoClientes({ empresa }) {
 
       {/* Modal Cadastro/Edição */}
       {modalAberto && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] flex items-start sm:items-center justify-center p-2 sm:p-4 animate-in fade-in duration-300 overflow-y-auto">
+          <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] w-full max-w-lg shadow-2xl border border-slate-200 my-auto overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[95vh] sm:max-h-[90vh]">
             <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                <div>
                   <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">{editando ? 'Editar CRM' : 'Novo Registro'}</h2>
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Dados do {t.Cliente}</p>
                </div>
-               <button onClick={() => setModalAberto(false)} className="p-3 hover:bg-white rounded-2xl transition-all shadow-sm border border-slate-100 bg-white/50"><X size={24} className="text-slate-400" /></button>
-            </div>
-            
-            <form onSubmit={salvarCliente} className="p-8 space-y-6">
+                <button onClick={() => setModalAberto(false)} className="p-3 hover:bg-white rounded-2xl transition-all shadow-sm border border-slate-100 bg-white/50"><X size={24} className="text-slate-400" /></button>
+             </div>
+             
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <form id="form-cliente" onSubmit={salvarCliente} className="p-8 space-y-6 pb-0">
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome</label>
@@ -377,15 +410,16 @@ export default function VisaoClientes({ empresa }) {
                <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 font-black">Preferências e Observações Técnicas</label>
                   <textarea rows="3" placeholder="Ex: Degradê na zero, risquinho na sobrancelha, gosta de café..." className="w-full bg-indigo-50/20 border border-indigo-100/50 rounded-2xl p-4 text-sm font-medium focus:ring-4 focus:ring-indigo-50 outline-none transition-all resize-none" value={form.notas} onChange={e => setForm({...form, notas: e.target.value})} />
-               </div>
+                </div>
+              </form>
+            </div>
 
-               <div className="pt-4 flex gap-4">
-                  <button type="button" onClick={() => setModalAberto(false)} className="flex-1 px-6 py-4 border-2 border-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-50 transition-all text-xs uppercase tracking-widest">Cancelar</button>
-                  <button type="submit" disabled={estaSalvando} className="flex-[2] px-6 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 transition-all active:scale-95 text-xs uppercase tracking-widest">
-                     {estaSalvando ? <Loader2 size={18} className="animate-spin" /> : <><Save size={18} /> {editando ? 'Atualizar Ficha' : `Salvar no CRM`}</>}
-                  </button>
-               </div>
-            </form>
+            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex gap-4">
+               <button type="button" onClick={() => setModalAberto(false)} className="flex-1 px-6 py-4 border-2 border-slate-200 bg-white text-slate-500 font-black rounded-2xl hover:bg-slate-50 transition-all text-sm uppercase tracking-widest">Cancelar</button>
+               <button form="form-cliente" type="submit" disabled={estaSalvando} className="flex-[2] px-6 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 transition-all active:scale-95 text-sm uppercase tracking-widest disabled:bg-slate-200">
+                  {estaSalvando ? <Loader2 size={18} className="animate-spin" /> : <><Save size={18} /> {editando ? 'Atualizar Ficha' : `Salvar no CRM`}</>}
+               </button>
+            </div>
           </div>
         </div>
       )}

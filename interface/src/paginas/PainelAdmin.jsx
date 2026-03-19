@@ -109,7 +109,10 @@ function MenuLateral({ abaAtiva, setAbaAtiva, estaAberto, setEstaAberto, usuario
             return (
               <button
                 key={item.id}
-                onClick={() => { setAbaAtiva(item.id); setEstaAberto(false); }}
+                onClick={() => { 
+                  setAbaAtiva(item.id); 
+                  if (window.innerWidth < 1024) setEstaAberto(false); 
+                }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium ${ativo ? 'bg-primary text-white shadow-lg shadow-black/20' : 'hover:bg-slate-800 hover:text-white'}`}
               >
                 <Icone size={18} className={ativo ? 'text-white' : 'text-slate-400'} /> {getLabelDinamica(item.id, item.label)}
@@ -124,7 +127,7 @@ function MenuLateral({ abaAtiva, setAbaAtiva, estaAberto, setEstaAberto, usuario
   );
 }
 
-function Cabecalho({ setEstaAberto, nomeEmpresa, usuario }) {
+function Cabecalho({ setEstaAberto, nomeEmpresa, usuario, setFeedback }) {
   const navegar = useNavigate();
   const t = useTermos(usuario?.empresa);
 
@@ -135,39 +138,40 @@ function Cabecalho({ setEstaAberto, nomeEmpresa, usuario }) {
   };
 
   return (
-    <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 lg:px-8 shadow-sm z-30">
-      <div className="flex items-center gap-4">
-        <button className="lg:hidden text-slate-500 hover:text-slate-800" onClick={() => setEstaAberto(true)}><Menu size={24} /></button>
-        <h2 className="text-lg font-semibold text-slate-800 hidden sm:block">Painel de Controle</h2>
+    <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-3 lg:px-8 shadow-sm z-30">
+      <div className="flex items-center gap-3">
+        <button className="lg:hidden p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl" onClick={() => setEstaAberto(true)}><Menu size={24} /></button>
+        <h2 className="text-lg font-black text-slate-800 hidden md:block">Painel de Controle</h2>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <DropdownNotificacoes empresaId={usuario?.empresaId} />
-        <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
+        <div className="flex items-center gap-1 sm:gap-2 border-l border-slate-200 pl-2 sm:pl-4">
           {usuario?.role === 'ADMIN' && (
             <button
               onClick={() => {
                 const url = `${window.location.origin}/${usuario?.empresa?.slug}`;
                 navigator.clipboard.writeText(url);
-                alert('Link de agendamento copiado: ' + url);
+                setFeedback({ tipo: 'sucesso', msg: 'Link de agendamento copiado!' });
+                setTimeout(() => setFeedback({ tipo: null, msg: '' }), 3000);
               }}
-              className="flex items-center gap-2 bg-[var(--cor-light)] text-primary px-3 py-1.5 rounded-lg text-xs font-bold hover:brightness-95 transition-all border border-primary/20"
+              className="flex items-center gap-2 bg-[var(--cor-light)] text-primary p-2 sm:px-3 sm:py-1.5 rounded-lg text-xs font-bold hover:brightness-95 transition-all border border-primary/20"
             >
-              <LinkIcon size={14} /> {t.CopiarLink || 'Copiar Link Público'}
+              <LinkIcon size={14} /> <span className="hidden sm:inline">{t.CopiarLink || 'Copiar Link Público'}</span>
             </button>
           )}
-          <div className="h-8 w-[1px] bg-slate-200 mx-2"></div>
+          <div className="h-6 w-[1px] bg-slate-200 mx-1 sm:mx-2"></div>
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-slate-800">{nomeEmpresa}</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-sm font-black text-slate-800 leading-tight">{nomeEmpresa}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
               {usuario?.role === 'ADMIN' ? 'Dono (Admin)' : 
                usuario?.role === 'PROFISSIONAL' ? t.Profissional : 'Operador'}
             </p>
           </div>
-          <UserCircle size={32} className="text-slate-400" />
+          <UserCircle size={28} className="text-slate-400" />
           <button
             onClick={handleLogout}
             title="Sair do Sistema"
-            className="ml-2 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
           >
             <LogOut size={20} />
           </button>
@@ -183,6 +187,7 @@ export default function PainelAdmin() {
   const [empresa, setEmpresa] = useState(null);
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const [feedback, setFeedback] = useState({ tipo: null, msg: '' });
 
   const tema = CORES_TEMA[usuario?.empresa?.corPrimaria] || CORES_TEMA.indigo;
 
@@ -242,7 +247,7 @@ export default function PainelAdmin() {
       case 'agenda': return <VisaoAgenda empresa={empresa} profissionalId={usuario?.role === 'PROFISSIONAL' ? usuario.id : null} />;
       case 'clientes': return <VisaoClientes empresa={empresa} />;
       case 'servicos': return <VisaoServicos empresa={empresa} />;
-      case 'funcionarios': return <VisaoFuncionarios empresa={empresa} />;
+      case 'funcionarios': return <VisaoFuncionarios empresa={empresa} usuarioLogado={usuario} setUsuarioLogado={setUsuario} />;
       case 'configuracoes': return <VisaoConfiguracoes empresaId={empresa.id} />;
       case 'financeiro': return <VisaoFinanceiro empresaId={empresa.id} />;
       case 'relatorios': return <VisaoRelatorios empresaId={empresa.id} />;
@@ -260,6 +265,15 @@ export default function PainelAdmin() {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+      {/* Toast Animado Global do Painel */}
+      {feedback.msg && (
+        <div className="fixed top-6 left-1/2 -track-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-300">
+          <div className={`px-6 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-md ${feedback.tipo === 'sucesso' ? 'bg-emerald-500/90 text-white border-emerald-400' : 'bg-rose-500/90 text-white border-rose-400'}`}>
+            <CheckCircle size={20} />
+            <span className="font-bold text-sm">{feedback.msg}</span>
+          </div>
+        </div>
+      )}
       <style dangerouslySetInnerHTML={{
         __html: `
         :root {
@@ -285,8 +299,9 @@ export default function PainelAdmin() {
           setEstaAberto={setMenuLateralAberto}
           nomeEmpresa={empresa?.nome}
           usuario={{ ...usuario, empresa }}
+          setFeedback={setFeedback}
         />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-8">
           {renderizarConteudo()}
         </main>
       </div>
@@ -356,8 +371,8 @@ function DropdownNotificacoes({ empresaId }) {
 
       {aberto && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setAberto(false)} />
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+          <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none" onClick={() => setAberto(false)} />
+          <div className="fixed inset-x-4 top-20 lg:absolute lg:inset-auto lg:right-0 lg:mt-2 w-auto sm:w-80 bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-black text-slate-800 text-sm">Notificações</h3>
               {naoLidas > 0 && <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-bold">{naoLidas} novas</span>}

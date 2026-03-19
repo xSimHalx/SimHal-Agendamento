@@ -115,21 +115,22 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Cabeçalho de Boas-vindas */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Bem-vindo de volta! 👋</h1>
-          <p className="text-slate-500">Acompanhe o desempenho do seu negócio em tempo real.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="text-center sm:text-left">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tighter uppercase">Bem-vindo! 👋</h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium italic">Seu negócio em tempo real.</p>
         </div>
-        <div className="flex gap-2 relative">
+        <div className="flex flex-col xs:flex-row items-stretch sm:items-center gap-2 relative">
           <div className="relative">
             <button 
               disabled={estaProcessando}
               onClick={() => setMenuAcoesAberto(!menuAcoesAberto)}
-              className={`flex items-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium hover:bg-slate-50 transition-all shadow-sm ${estaProcessando ? 'opacity-50' : ''}`}
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm ${estaProcessando ? 'opacity-50' : ''}`}
             >
-              {estaProcessando ? <Loader2 size={18} className="animate-spin text-amber-500" /> : <Zap size={18} className="text-amber-500" />} 
+              {estaProcessando ? <Loader2 size={16} className="animate-spin text-amber-500" /> : <Zap size={16} className="text-amber-500" />} 
               Ações Rápidas
             </button>
+            {/* ... MenuAcoesAberto ... */}
 
             {menuAcoesAberto && (
               <>

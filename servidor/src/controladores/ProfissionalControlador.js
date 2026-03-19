@@ -84,7 +84,8 @@ const ProfissionalControlador = {
         foto,
         email,
         telefone,
-        horariosDeTrabalho
+        horariosDeTrabalho,
+        isProfissional: req.body.isProfissional // Suporte para ativar/desativar
       };
 
       if (senha && senha.trim() !== '') {

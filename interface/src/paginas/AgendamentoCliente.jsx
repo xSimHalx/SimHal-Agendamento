@@ -331,16 +331,30 @@ export default function AgendamentoCliente() {
     const Icone = infoEtapa.icone;
 
     return (
-      <div className="w-full lg:w-[280px] bg-[#f8f9fa] p-8 flex flex-col items-center text-center border-r border-slate-200">
+      <div className="w-full lg:w-[280px] bg-[#f8f9fa] p-6 lg:p-8 flex flex-col items-center text-center border-b lg:border-r border-slate-200">
+        <div className="w-full flex justify-between items-center lg:hidden mb-6">
+          <button 
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-slate-400 hover:text-slate-800 font-bold text-[10px] uppercase tracking-widest transition-colors"
+          >
+            <ArrowLeft size={14} /> Lojas
+          </button>
+          <div className="flex gap-1.5">
+            {[1, 2, 3, 4, 5, 6].map(s => (
+              <div key={s} className={`w-1.5 h-1.5 rounded-full transition-colors ${s === etapa ? 'bg-primary' : 'bg-slate-300'}`} />
+            ))}
+          </div>
+        </div>
+
         <button 
           onClick={() => navigate('/')}
-          className="mb-8 flex items-center gap-2 text-slate-400 hover:text-slate-800 font-bold text-[11px] uppercase tracking-widest transition-colors group"
+          className="hidden lg:flex mb-8 items-center gap-2 text-slate-400 hover:text-slate-800 font-bold text-[11px] uppercase tracking-widest transition-colors group"
         >
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
           Ver outras lojas
         </button>
 
-        <div className="flex gap-2 mb-12">
+        <div className="hidden lg:flex gap-2 mb-12">
           {[1, 2, 3, 4, 5, 6].map(s => (
             <div key={s} className={`w-2 h-2 rounded-full transition-colors ${s === etapa ? 'bg-primary' : 'bg-slate-300'}`} />
           ))}
@@ -435,16 +449,16 @@ export default function AgendamentoCliente() {
     };
 
     return (
-      <div className="flex-1 flex flex-col bg-white h-[600px]">
+      <div className="flex-1 flex flex-col bg-white min-h-[450px] lg:h-[600px]">
         <div className="px-8 py-5 border-b border-slate-200 flex justify-between items-center">
           <h2 className="text-lg font-bold text-slate-800">{titulos[etapa]}</h2>
           <button className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
           
           {etapa === 1 && (
-            <div className="flex justify-center gap-6">
+            <div className="grid grid-cols-2 sm:flex sm:justify-center gap-4 sm:gap-6">
                 {Array.isArray(profissionais) && profissionais.map((p) => (
                   <button
                     key={p.id}
@@ -464,7 +478,7 @@ export default function AgendamentoCliente() {
                         </div>
                       )}
                     </div>
-                    <span className="font-semibold text-slate-800">{p.nome}</span>
+                    <span className="font-bold text-slate-800 text-sm sm:text-base">{p.nome}</span>
                   </button>
                 ))}
                 {(!Array.isArray(profissionais) || profissionais.length === 0) && (
@@ -654,7 +668,7 @@ export default function AgendamentoCliente() {
           )}
           {etapa === 5 && (
             <div className="space-y-4">
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Primeiro Nome</label>
                   <input 
@@ -786,10 +800,10 @@ export default function AgendamentoCliente() {
         </div>
 
         {etapa < 7 && (
-          <div className="px-8 py-5 border-t border-slate-200 flex justify-between items-center bg-white">
+          <div className="px-4 py-4 sm:px-8 sm:py-5 border-t border-slate-200 flex justify-between items-center bg-white sticky bottom-0 lg:relative z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none">
             {(etapa > 1 && etapa !== 6) ? (
-              <button onClick={etapaAnterior} className="flex items-center text-slate-600 font-bold hover:text-slate-800 transition-colors">
-                <ChevronLeft size={20} className="mr-1" /> Voltar
+              <button onClick={etapaAnterior} className="flex items-center text-slate-600 font-bold hover:text-slate-800 transition-colors text-xs sm:text-sm">
+                <ChevronLeft size={18} className="mr-1" /> Voltar
               </button>
             ) : <div />}
 
@@ -869,9 +883,9 @@ export default function AgendamentoCliente() {
   const tema = CORES_TEMA[empresa?.corPrimaria] || CORES_TEMA.indigo;
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 sm:p-8 font-sans" style={{ backgroundImage: 'radial-gradient(circle at center, #334155 0%, #0f172a 100%)' }}>
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-0 sm:p-4 lg:p-8 font-sans" style={{ backgroundImage: 'radial-gradient(circle at center, #334155 0%, #0f172a 100%)' }}>
       
-      <div className="bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col lg:flex-row w-full max-w-[1000px] h-[750px] lg:h-[650px] animate-in zoom-in-95 duration-300">
+      <div className="bg-white rounded-none sm:rounded-xl shadow-2xl overflow-hidden flex flex-col lg:flex-row w-full max-w-[1000px] min-h-screen sm:min-h-0 lg:h-[650px] animate-in zoom-in-95 duration-300">
         <style dangerouslySetInnerHTML={{__html: `
           :root {
             --cor-primaria: ${tema.primary};

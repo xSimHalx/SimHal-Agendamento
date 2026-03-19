@@ -32,6 +32,7 @@ export default function Login() {
   const [empresaRegistro, setEmpresaRegistro] = useState('');
   const [emailRegistro, setEmailRegistro] = useState('');
   const [senhaRegistro, setSenhaRegistro] = useState('');
+  const [feedback, setFeedback] = useState({ tipo: null, msg: '' });
 
   // ==========================================
   // FUNÇÕES DE AÇÃO
@@ -49,8 +50,8 @@ export default function Login() {
         
         localStorage.setItem('@SimHal:token', resposta.data.token);
         localStorage.setItem('@SimHal:usuario', JSON.stringify(resposta.data.usuario));
-        alert('Bem-vindo ao sistema!');
-        navegar('/admin');
+        setFeedback({ tipo: 'sucesso', msg: 'Bem-vindo ao sistema!' });
+        setTimeout(() => navegar('/admin'), 1500);
       } else {
         await axios.post(`${API_BASE}/registrar`, {
           nome: nomeRegistro,
@@ -58,13 +59,14 @@ export default function Login() {
           email: emailRegistro,
           senha: senhaRegistro
         });
-        alert('Cadastro realizado! Agora você pode fazer login.');
+        setFeedback({ tipo: 'sucesso', msg: 'Cadastro realizado! Faça seu login.' });
         setEstaNoLogin(true);
       }
     } catch (erro) {
-      alert(erro.response?.data?.erro || 'Ocorreu um erro na autenticação.');
+      setFeedback({ tipo: 'erro', msg: erro.response?.data?.erro || 'Ocorreu um erro na autenticação.' });
     } finally {
       setEstaCarregando(false);
+      setTimeout(() => setFeedback({ tipo: null, msg: '' }), 4000);
     }
   };
 
@@ -176,6 +178,19 @@ export default function Login() {
   return (
     // Container Principal: Overflow Hidden evita barras de rolagem durante a animação
     <div className="min-h-screen relative font-sans bg-white overflow-hidden flex flex-col lg:block">
+      
+      {/* Toast Animado */}
+      {feedback.msg && (
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-300`}>
+          <div className={`
+            px-6 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-md
+            ${feedback.tipo === 'sucesso' ? 'bg-emerald-500/90 text-white border-emerald-400' : 'bg-rose-500/90 text-white border-rose-400'}
+          `}>
+            {feedback.tipo === 'sucesso' ? <ShieldCheck size={20} /> : <ShieldCheck size={20} className="rotate-180" />}
+            <span className="font-bold text-sm">{feedback.msg}</span>
+          </div>
+        </div>
+      )}
       
       {/* ==========================================
           LADO 1: O FORMULÁRIO BRANCO

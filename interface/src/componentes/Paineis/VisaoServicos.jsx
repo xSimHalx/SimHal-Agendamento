@@ -25,6 +25,8 @@ export default function VisaoServicos({ empresa }) {
   const [modalAberto, setModalAberto] = useState(false);
   const [editando, setEditando] = useState(null);
   const [form, setForm] = useState({ nome: '', descricao: '', preco: '', duracao: 30, tempoBuffer: 0, capacidadeMaxima: 1 });
+  const [feedback, setFeedback] = useState({ tipo: null, msg: '' });
+  const [confirmacaoExclusao, setConfirmacaoExclusao] = useState(null);
 
   const carregarDados = useCallback(async () => {
     if (!empresaId) return;
@@ -75,10 +77,13 @@ export default function VisaoServicos({ empresa }) {
         await axios.post(`${API_URL}/api/negocio/${baseUri}`, dados);
       }
 
+      setFeedback({ tipo: 'sucesso', msg: 'Item salvo com sucesso!' });
       setModalAberto(false);
       carregarDados();
     } catch (erro) {
-      alert("Erro ao salvar item.");
+      setFeedback({ tipo: 'erro', msg: 'Erro ao salvar item.' });
+    } finally {
+      setTimeout(() => setFeedback({ tipo: null, msg: '' }), 3000);
     }
   };
 
@@ -96,13 +101,15 @@ export default function VisaoServicos({ empresa }) {
   };
 
   const excluir = async (id) => {
-    if (!window.confirm("Deseja realmente excluir este item?")) return;
     try {
       const baseUri = abaAtiva === 'principais' ? 'servicos' : 'adicionais';
       await axios.delete(`${API_URL}/api/negocio/${baseUri}/${id}`);
+      setFeedback({ tipo: 'sucesso', msg: 'Item excluído catálogo.' });
       carregarDados();
+      setConfirmacaoExclusao(null);
     } catch (erro) {
-      console.error("Erro ao excluir:", erro);
+      setFeedback({ tipo: 'erro', msg: 'Erro ao excluir item.' });
+      setTimeout(() => setFeedback({ tipo: null, msg: '' }), 3000);
     }
   };
 
@@ -112,6 +119,32 @@ export default function VisaoServicos({ empresa }) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
+      {/* Feedback Visual UI */}
+      {feedback.msg && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-300">
+          <div className={`px-6 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-md ${feedback.tipo === 'sucesso' ? 'bg-emerald-500/90 text-white border-emerald-400' : 'bg-rose-500/90 text-white border-rose-400'}`}>
+            <CheckCircle2 size={20} />
+            <span className="font-bold text-sm">{feedback.msg}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmação de Exclusão UI */}
+      {confirmacaoExclusao && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center animate-in zoom-in-95">
+            <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-500 mx-auto mb-6">
+              <Trash2 size={40} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 mb-2">Excluir Item?</h3>
+            <p className="text-slate-500 text-sm font-medium mb-8">Esta ação removerá permanentemente o item do catálogo de sua empresa.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmacaoExclusao(null)} className="flex-1 px-6 py-4 bg-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-200 transition-all text-xs uppercase tracking-widest">Cancelar</button>
+              <button onClick={() => excluir(confirmacaoExclusao)} className="flex-1 px-6 py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all text-xs uppercase tracking-widest shadow-lg shadow-rose-100">Excluir</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Cabeçalho de Gestão */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -187,7 +220,7 @@ export default function VisaoServicos({ empresa }) {
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => abrirModal(item)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-sm border border-slate-50 bg-white"><Edit size={16} /></button>
-                  <button onClick={() => excluir(item.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all shadow-sm border border-slate-50 bg-white"><Trash2 size={16} /></button>
+                  <button onClick={() => setConfirmacaoExclusao(item.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all shadow-sm border border-slate-50 bg-white"><Trash2 size={16} /></button>
                 </div>
               </div>
 
@@ -217,18 +250,19 @@ export default function VisaoServicos({ empresa }) {
         </div>
       )}
 
-      {/* Modal Premium */}
       {modalAberto && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 animate-in fade-in duration-300 overflow-y-auto">
+          <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] w-full max-w-lg shadow-2xl border border-slate-200 my-auto overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
                 <h2 className="font-black text-slate-800 text-2xl">{editando ? 'Editar' : 'Novo'} {abaAtiva === 'principais' ? t.Servico : 'Adicional'}</h2>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Catálogo Profissional</p>
               </div>
               <button onClick={() => setModalAberto(false)} className="p-3 hover:bg-white rounded-2xl transition-all shadow-sm border border-slate-100 bg-white/50"><X size={24} className="text-slate-400" /></button>
-            </div>
-            <form onSubmit={salvar} className="p-8 space-y-6">
+             </div>
+             
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <form id="form-servico" onSubmit={salvar} className="p-8 space-y-6 pb-0">
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome do Item</label>
                 <input
@@ -300,23 +334,26 @@ export default function VisaoServicos({ empresa }) {
                     </div>
                   </>
                 )}
-              </div>
-              <div className="pt-6 flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setModalAberto(false)}
-                  className="flex-1 px-6 py-4 border-2 border-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-50 transition-all text-sm uppercase tracking-widest"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="flex-[2] px-6 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 transition-all active:scale-95 text-sm uppercase tracking-widest"
-                >
-                  <Save size={20} /> {editando ? 'Salvar Alterações' : 'Criar Novo Item'}
-                </button>
-              </div>
-            </form>
+               </div>
+              </form>
+            </div>
+
+            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex gap-4">
+              <button
+                type="button"
+                onClick={() => setModalAberto(false)}
+                className="flex-1 px-6 py-4 border-2 border-slate-200 bg-white text-slate-500 font-black rounded-2xl hover:bg-slate-50 transition-all text-sm uppercase tracking-widest"
+              >
+                Cancelar
+              </button>
+              <button
+                form="form-servico"
+                type="submit"
+                className="flex-[2] px-6 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 transition-all active:scale-95 text-sm uppercase tracking-widest"
+              >
+                <Save size={20} /> {editando ? 'Salvar Alterações' : 'Criar Novo Item'}
+              </button>
+            </div>
           </div>
         </div>
       )}

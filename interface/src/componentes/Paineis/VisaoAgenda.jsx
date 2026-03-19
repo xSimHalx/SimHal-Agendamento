@@ -37,6 +37,7 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
   const [dataAberturaModal, setDataAberturaModal] = useState(null);
   const [profissionalAberturaModal, setProfissionalAberturaModal] = useState(null);
   const [visao, setVisao] = useState('dia'); // 'dia' ou 'mes'
+  const [profissionalVisivelId, setProfissionalVisivelId] = useState(null); // Para mobile
 
   const carregarDados = useCallback(async () => {
     if (!empresaId) return;
@@ -55,6 +56,9 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
       }
 
       setProfissionais(listaPros);
+      if (listaPros.length > 0 && !profissionalVisivelId) {
+        setProfissionalVisivelId(listaPros[0].id);
+      }
       setAgendamentos(resA.data);
       setBloqueios(resB.data);
       setCamposDefinicao(resC.data || []);
@@ -132,16 +136,16 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
           </button>
         </div>
 
-        <div className="flex bg-slate-100 p-1 rounded-xl">
+        <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto scrollbar-hide">
            <button 
              onClick={() => setVisao('dia')}
-             className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${visao === 'dia' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+             className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${visao === 'dia' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
            >
              Dia
            </button>
            <button 
              onClick={() => setVisao('mes')}
-             className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${visao === 'mes' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+             className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${visao === 'mes' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
            >
              Mês
            </button>
@@ -181,8 +185,21 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
       <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
         {visao === 'dia' ? (
           <>
-            {/* Cabeçalho de Profissionais */}
-            <div className="flex border-b border-slate-100 bg-slate-50/50">
+            {/* Seletor de Profissionais (Mobile) */}
+            <div className="lg:hidden flex border-b border-slate-100 bg-slate-50 overflow-x-auto scrollbar-hide p-2 gap-2">
+              {profissionais.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => setProfissionalVisivelId(p.id)}
+                  className={`shrink-0 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${profissionalVisivelId === p.id ? 'bg-white border-primary text-primary shadow-sm' : 'bg-transparent border-transparent text-slate-400'}`}
+                >
+                  {p.nome}
+                </button>
+              ))}
+            </div>
+
+            {/* Cabeçalho de Profissionais (Desktop) */}
+            <div className="hidden lg:flex border-b border-slate-100 bg-slate-50/50">
               <div className="w-20 border-r border-slate-100 flex items-center justify-center">
                  <Clock size={16} className="text-slate-400" />
               </div>
@@ -230,10 +247,12 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
                          return slotTime >= blInicio && slotTime < blFim && (bl.profissionalId === null || bl.profissionalId === profissional.id);
                        });
 
+                       const isVisivelMobile = profissional.id === profissionalVisivelId;
+
                        return (
                          <div 
                             key={profissional.id} 
-                            className="min-w-[200px] flex-1 border-r border-slate-100 relative p-1 hover:bg-slate-50/50 cursor-pointer transition-colors"
+                            className={`min-w-[280px] lg:min-w-[200px] flex-1 border-r border-slate-100 relative p-1.5 hover:bg-slate-50/50 cursor-pointer transition-colors ${!isVisivelMobile ? 'hidden lg:block' : 'block'}`}
                             onClick={() => !agendamento && !bloqueio && abrirModalComDados(hora, profissional)}
                          >
                            {agendamento && (
@@ -290,7 +309,7 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
             className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity" 
             onClick={() => setAgendamentoAtivo(null)}
           />
-          <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 border-l border-slate-100 flex flex-col">
+            <div className="fixed top-0 right-0 h-full w-full sm:max-w-sm bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 border-l border-slate-100 flex flex-col">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h3 className="text-lg font-black text-slate-800">Detalhes do Agendamento</h3>
               <button onClick={() => setAgendamentoAtivo(null)} className="p-2 hover:bg-white rounded-xl transition-all shadow-sm border border-slate-100">
