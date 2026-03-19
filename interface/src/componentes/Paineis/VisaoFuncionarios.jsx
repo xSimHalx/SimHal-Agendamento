@@ -6,8 +6,10 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api/negocio/profissionais';
 import { useTermos } from '../../hooks/useTermos';
+import API_URL from '../../servicos/api';
+
+const API_BASE = `${API_URL}/api/negocio/profissionais`;
 
 export default function VisaoFuncionarios({ empresa }) {
   const empresaId = empresa?.id;

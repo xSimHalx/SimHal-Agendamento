@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, MessageCircle, PlayCircle, FileText, X, Send, Loader2, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 
 export default function VisaoSuporte({ empresaId }) {
     const [modalAberto, setModalAberto] = useState(false);
@@ -12,7 +13,7 @@ export default function VisaoSuporte({ empresaId }) {
         e.preventDefault();
         try {
             setEnviando(true);
-            await axios.post('http://localhost:3001/api/negocio/suporte/chamados', {
+            await axios.post(`${API_URL}/api/negocio/suporte/chamados`, {
                 ...form,
                 empresaId
             });

@@ -6,6 +6,7 @@ import {
   AlertCircle, MoreVertical, Loader2, ToggleLeft, ToggleRight
 } from 'lucide-react';
 import { useTermos } from '../../hooks/useTermos';
+import API_URL from '../../servicos/api';
 
 const formatarMoeda = (valor) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(valor) / 100);
@@ -29,7 +30,7 @@ export default function VisaoServicos({ empresa }) {
     if (!empresaId) return;
     setCarregando(true);
     try {
-      const response = await axios.get(`http://localhost:3001/api/negocio/servicos/${empresaId}`);
+      const response = await axios.get(`${API_URL}/api/negocio/servicos/${empresaId}`);
       // A API de serviços já retorna tanto servicos quanto adicionais
       setServicos(response.data.servicos || []);
       setAdicionais(response.data.adicionais || []);
@@ -69,9 +70,9 @@ export default function VisaoServicos({ empresa }) {
       const dados = { ...form, preco: Math.round(parseFloat(form.preco || 0) * 100), empresaId };
 
       if (editando) {
-        await axios.put(`http://localhost:3001/api/negocio/${baseUri}/${editando.id}`, dados);
+        await axios.put(`${API_URL}/api/negocio/${baseUri}/${editando.id}`, dados);
       } else {
-        await axios.post(`http://localhost:3001/api/negocio/${baseUri}`, dados);
+        await axios.post(`${API_URL}/api/negocio/${baseUri}`, dados);
       }
 
       setModalAberto(false);
@@ -84,7 +85,7 @@ export default function VisaoServicos({ empresa }) {
   const alternarStatus = async (item) => {
     try {
       const baseUri = abaAtiva === 'principais' ? 'servicos' : 'adicionais';
-      await axios.put(`http://localhost:3001/api/negocio/${baseUri}/${item.id}`, {
+      await axios.put(`${API_URL}/api/negocio/${baseUri}/${item.id}`, {
         ...item,
         ativo: !item.ativo
       });
@@ -98,7 +99,7 @@ export default function VisaoServicos({ empresa }) {
     if (!window.confirm("Deseja realmente excluir este item?")) return;
     try {
       const baseUri = abaAtiva === 'principais' ? 'servicos' : 'adicionais';
-      await axios.delete(`http://localhost:3001/api/negocio/${baseUri}/${id}`);
+      await axios.delete(`${API_URL}/api/negocio/${baseUri}/${id}`);
       carregarDados();
     } catch (erro) {
       console.error("Erro ao excluir:", erro);

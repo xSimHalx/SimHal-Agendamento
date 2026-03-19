@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Zap, MessageSquare, Clock, Gift, ToggleLeft, ToggleRight, Star, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 
 export default function VisaoAutomacao({ empresaId }) {
     const [regras, setRegras] = useState({
@@ -14,7 +15,7 @@ export default function VisaoAutomacao({ empresaId }) {
     const carregarConfiguracoes = async () => {
         try {
             setCarregando(true);
-            const res = await axios.get(`http://localhost:3001/api/negocio/automacao/${empresaId}`);
+            const res = await axios.get(`${API_URL}/api/negocio/automacao/${empresaId}`);
             setRegras(res.data);
         } catch (erro) {
             console.error("Erro ao carregar automações:", erro);
@@ -32,7 +33,7 @@ export default function VisaoAutomacao({ empresaId }) {
         try {
             // Atualização otimista
             setRegras(prev => ({ ...prev, [campo]: novoValor }));
-            await axios.patch(`http://localhost:3001/api/negocio/automacao/${empresaId}`, {
+            await axios.patch(`${API_URL}/api/negocio/automacao/${empresaId}`, {
                 campo,
                 valor: novoValor
             });

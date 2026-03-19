@@ -8,6 +8,7 @@ import { format, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ModalNovoAgendamento from '../Modais/ModalNovoAgendamento';
 import { useTermos } from '../../hooks/useTermos';
+import API_URL from '../../servicos/api';
 
 const CORES_STATUS = {
   PENDENTE: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -42,10 +43,10 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
     setCarregando(true);
     try {
       const [resP, resA, resB, resC] = await Promise.all([
-        axios.get(`http://localhost:3001/api/negocio/profissionais/${empresaId}`),
-        axios.get(`http://localhost:3001/api/negocio/agendamentos/dia/${empresaId}?data=${format(dataSelecionada, 'yyyy-MM-dd')}`),
-        axios.get(`http://localhost:3001/api/negocio/bloqueios/${empresaId}`),
-        axios.get(`http://localhost:3001/api/negocio/campos-formulario/${empresaId}`)
+        axios.get(`${API_URL}/api/negocio/profissionais/${empresaId}`),
+        axios.get(`${API_URL}/api/negocio/agendamentos/dia/${empresaId}?data=${format(dataSelecionada, 'yyyy-MM-dd')}`),
+        axios.get(`${API_URL}/api/negocio/bloqueios/${empresaId}`),
+        axios.get(`${API_URL}/api/negocio/campos-formulario/${empresaId}`)
       ]);
 
       let listaPros = resP.data;
@@ -80,7 +81,7 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
 
   const mudarStatus = async (id, novoStatus) => {
     try {
-      const res = await axios.put(`http://localhost:3001/api/negocio/agendamentos/status/${id}`, { status: novoStatus });
+      const res = await axios.put(`${API_URL}/api/negocio/agendamentos/status/${id}`, { status: novoStatus });
       setAgendamentos(agendamentos.map(a => a.id === id ? res.data : a));
       if (agendamentoAtivo?.id === id) setAgendamentoAtivo(res.data);
     } catch (erro) {
@@ -91,7 +92,7 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
   const excluirBloqueio = async (id) => {
     if (!window.confirm("Deseja remover este bloqueio e liberar o horário?")) return;
     try {
-      await axios.delete(`http://localhost:3001/api/negocio/bloqueios/${id}`);
+      await axios.delete(`${API_URL}/api/negocio/bloqueios/${id}`);
       carregarDados();
     } catch (erro) {
       alert("Erro ao excluir bloqueio.");

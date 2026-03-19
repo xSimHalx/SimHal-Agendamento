@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Clock, Search, Filter, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 
 export default function VisaoAuditoria({ empresaId }) {
     const [logs, setLogs] = useState([]);
@@ -10,7 +11,7 @@ export default function VisaoAuditoria({ empresaId }) {
     const carregarLogs = async () => {
         try {
             setCarregando(true);
-            const res = await axios.get(`http://localhost:3001/api/negocio/auditoria/logs/${empresaId}`);
+            const res = await axios.get(`${API_URL}/api/negocio/auditoria/logs/${empresaId}`);
             setLogs(res.data);
         } catch (erro) {
             console.error("Erro ao carregar logs:", erro);

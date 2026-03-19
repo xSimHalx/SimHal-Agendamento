@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 import { 
   X, Calendar, Clock, User, Briefcase, 
   ChevronRight, ChevronLeft, Loader2, CheckCircle2,
@@ -35,8 +36,8 @@ export default function ModalNovoAgendamento({ empresaId, onClose, onSucesso, da
     const carregarDados = async () => {
       try {
         const [resP, resS] = await Promise.all([
-          axios.get(`http://localhost:3001/api/negocio/profissionais/${empresaId}`),
-          axios.get(`http://localhost:3001/api/negocio/servicos/${empresaId}`)
+          axios.get(`${API_URL}/api/negocio/profissionais/${empresaId}`),
+          axios.get(`${API_URL}/api/negocio/servicos/${empresaId}`)
         ]);
         setProfissionais(resP.data);
         setServicos(resS.data.servicos || []);
@@ -54,7 +55,7 @@ export default function ModalNovoAgendamento({ empresaId, onClose, onSucesso, da
       if (!formData.profissionalId || !formData.servicoId || !formData.data) return;
       setBuscandoHorarios(true);
       try {
-        const res = await axios.get(`http://localhost:3001/api/negocio/disponibilidade`, {
+        const res = await axios.get(`${API_URL}/api/negocio/disponibilidade`, {
           params: {
             profissionalId: formData.profissionalId,
             servicoId: formData.servicoId,
@@ -76,7 +77,7 @@ export default function ModalNovoAgendamento({ empresaId, onClose, onSucesso, da
       setCarregando(true);
       const dataHora = new Date(`${formData.data}T${formData.hora}:00`);
       
-      await axios.post('http://localhost:3001/api/negocio/agendamentos', {
+      await axios.post(`${API_URL}/api/negocio/agendamentos`, {
         ...formData,
         dataHora,
         empresaId

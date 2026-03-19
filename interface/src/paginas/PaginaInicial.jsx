@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Search, MapPin, ArrowRight, Scissors, Star, ShieldCheck, Zap } from 'lucide-react';
+import API_URL from '../servicos/api';
 
 export default function PaginaInicial() {
   const [empresas, setEmpresas] = useState([]);
@@ -12,7 +13,7 @@ export default function PaginaInicial() {
   useEffect(() => {
     const carregarEmpresas = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/negocio/todas');
+        const response = await axios.get(`${API_URL}/api/negocio/todas`);
         setEmpresas(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error("Erro ao carregar lojas:", error);

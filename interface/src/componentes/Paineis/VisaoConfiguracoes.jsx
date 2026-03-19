@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { format } from 'date-fns';
+import API_URL from '../../servicos/api';
 
 export default function VisaoConfiguracoes({ empresaId }) {
   const [empresa, setEmpresa] = useState(null);
@@ -62,7 +63,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
 
   const carregarBloqueios = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/negocio/bloqueios/${empresaId}`);
+      const res = await axios.get(`${API_URL}/api/negocio/bloqueios/${empresaId}`);
       setBloqueios(res.data);
     } catch (erro) {
       console.error(erro);
@@ -71,7 +72,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
 
   const carregarProfissionais = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/negocio/profissionais/${empresaId}`);
+      const res = await axios.get(`${API_URL}/api/negocio/profissionais/${empresaId}`);
       setProfissionais(res.data);
     } catch (erro) {
       console.error(erro);
@@ -80,7 +81,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
 
   const carregarCampos = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/negocio/campos-formulario/${empresaId}`);
+      const res = await axios.get(`${API_URL}/api/negocio/campos-formulario/${empresaId}`);
       setCampos(res.data);
     } catch (erro) {
       console.error(erro);
@@ -91,7 +92,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
     if (!novoCampo.label) return;
     setCriandoCampo(true);
     try {
-      await axios.post('http://localhost:3001/api/negocio/campos-formulario', {
+      await axios.post(`${API_URL}/api/negocio/campos-formulario`, {
         ...novoCampo,
         empresaId
       });
@@ -106,7 +107,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
 
   const excluirCampo = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/api/negocio/campos-formulario/${id}`);
+      await axios.delete(`${API_URL}/api/negocio/campos-formulario/${id}`);
       carregarCampos();
     } catch (erro) {
       alert("Erro ao excluir campo.");
@@ -116,7 +117,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
   const criarBloqueio = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3001/api/negocio/bloqueios', {
+      await axios.post(`${API_URL}/api/negocio/bloqueios`, {
         ...novoBloqueio,
         empresaId
       });
@@ -129,7 +130,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
 
   const excluirBloqueio = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/api/negocio/bloqueios/${id}`);
+      await axios.delete(`${API_URL}/api/negocio/bloqueios/${id}`);
       carregarBloqueios();
     } catch (erro) {
       alert("Erro ao excluir bloqueio.");
@@ -140,7 +141,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
     const carregarConfig = async () => {
       if (!empresaId) return;
       try {
-        const res = await axios.get(`http://localhost:3001/api/negocio/info/pelo-id/${empresaId}`);
+        const res = await axios.get(`${API_URL}/api/negocio/info/pelo-id/${empresaId}`);
         setEmpresa(res.data);
         setForm({
           nome: res.data.nome || '',
@@ -185,7 +186,7 @@ export default function VisaoConfiguracoes({ empresaId }) {
     setEstaSalvando(true);
     setSucesso(false);
     try {
-      await axios.put(`http://localhost:3001/api/negocio/info/${empresaId}`, form);
+      await axios.put(`${API_URL}/api/negocio/info/${empresaId}`, form);
       setSucesso(true);
       setTimeout(() => setSucesso(false), 3000);
     } catch (erro) {

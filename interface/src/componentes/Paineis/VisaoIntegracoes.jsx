@@ -5,6 +5,7 @@ import {
     Globe, Key, Zap, Info, Loader2, Save, Smartphone, RefreshCw
 } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 
 export default function VisaoIntegracoes({ empresaId }) {
     const [carregando, setCarregando] = useState(true);
@@ -18,7 +19,7 @@ export default function VisaoIntegracoes({ empresaId }) {
         msgLembreteAtiva: false
     });
 
-    const API_BASE = 'http://localhost:3001/api/negocio';
+    const API_BASE = `${API_URL}/api/negocio`;
 
     useEffect(() => {
         const carregarConfig = async () => {

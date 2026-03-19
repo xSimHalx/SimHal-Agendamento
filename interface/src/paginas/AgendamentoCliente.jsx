@@ -21,6 +21,7 @@ import {
 import { ptBR } from 'date-fns/locale';
 import axios from 'axios';
 import { useTermos } from '../hooks/useTermos';
+import API_URL from '../servicos/api';
 
 // Formatador de Moeda
 const formatarMoeda = (valor) => {
@@ -83,14 +84,14 @@ export default function AgendamentoCliente() {
         // 1. Buscar Info da Empresa (pelo slug)
         // Nota: Criaremos esta rota se não existir, por enquanto vamos buscar direto pelo ID fixo do Seed
         // Mas o correto é buscar por slug. Vamos assumir que buscar pelo ID do seed por enquanto.
-        const resEmpresa = await axios.get(`http://localhost:3001/api/negocio/info/${slug}`);
+        const resEmpresa = await axios.get(`${API_URL}/api/negocio/info/${slug}`);
         const dadosEmpresa = resEmpresa.data;
         setEmpresa(dadosEmpresa);
 
         // 2. Buscar Profissionais e Serviços desta empresa
         const [resPros, resServsData] = await Promise.all([
-          axios.get(`http://localhost:3001/api/negocio/profissionais/${dadosEmpresa.id}`),
-          axios.get(`http://localhost:3001/api/negocio/servicos/${dadosEmpresa.id}`)
+          axios.get(`${API_URL}/api/negocio/profissionais/${dadosEmpresa.id}`),
+          axios.get(`${API_URL}/api/negocio/servicos/${dadosEmpresa.id}`)
         ]);
 
         const { servicos: servicosApi, adicionais: adicionaisApi } = resServsData.data || {};
@@ -101,7 +102,7 @@ export default function AgendamentoCliente() {
 
         // 3. Buscar Campos Personalizados do Formulário
         try {
-          const resCampos = await axios.get(`http://localhost:3001/api/negocio/campos-formulario/${dadosEmpresa.id}`);
+          const resCampos = await axios.get(`${API_URL}/api/negocio/campos-formulario/${dadosEmpresa.id}`);
           setCamposFormulario(resCampos.data || []);
         } catch (e) {
           console.error("Erro ao buscar campos extras:", e);
@@ -128,7 +129,7 @@ export default function AgendamentoCliente() {
       setCarregandoMes(true);
       try {
         const mesStr = format(mesReferencia, 'yyyy-MM');
-        const response = await axios.get('http://localhost:3001/api/negocio/disponibilidade-mensal', {
+        const response = await axios.get(`${API_URL}/api/negocio/disponibilidade-mensal`, {
           params: {
             profissionalId: profissionalSelecionado.id,
             servicoId: servicoSelecionado.id,
@@ -152,7 +153,7 @@ export default function AgendamentoCliente() {
 
       setCarregandoHorarios(true);
       try {
-        const response = await axios.get(`http://localhost:3001/api/negocio/disponibilidade`, {
+        const response = await axios.get(`${API_URL}/api/negocio/disponibilidade`, {
           params: {
             profissionalId: profissionalSelecionado.id,
             servicoId: servicoSelecionado.id,
@@ -257,7 +258,7 @@ export default function AgendamentoCliente() {
         respostasExtras
       };
 
-      const response = await axios.post('http://localhost:3001/api/negocio/agendamentos', payload);
+      const response = await axios.post(`${API_URL}/api/negocio/agendamentos`, payload);
       if (response.data.linkWhatsApp) {
         setLinkWhatsApp(response.data.linkWhatsApp);
       }
@@ -275,7 +276,7 @@ export default function AgendamentoCliente() {
   const gerarCobranca = async () => {
     setCarregandoPagamento(true);
     try {
-        const res = await axios.post('http://localhost:3001/api/negocio/checkout/preferencia', {
+        const res = await axios.post(`${API_URL}/api/negocio/checkout/preferencia`, {
             empresaId: empresa.id,
             valorCentavos: calcularTotal(),
             servicoNome: servicoSelecionado.nome
@@ -293,7 +294,7 @@ export default function AgendamentoCliente() {
     setCarregandoPagamento(true);
     try {
         // Simulação de verificação
-        await axios.get(`http://localhost:3001/api/negocio/checkout/status/${pagamento.id}`);
+        await axios.get(`${API_URL}/api/negocio/checkout/status/${pagamento.id}`);
         // Após "verificar", procedemos com a confirmação do agendamento
         confirmarAgendamento();
     } catch (erro) {

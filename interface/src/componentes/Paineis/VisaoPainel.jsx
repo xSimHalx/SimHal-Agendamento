@@ -10,6 +10,7 @@ import {
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { format } from 'date-fns';
+import API_URL from '../../servicos/api';
 
 export default function VisaoPainel({ usuario, setAbaAtiva }) {
   const [dados, setDados] = useState(null);
@@ -35,7 +36,7 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
     
     setCarregando(true);
     try {
-      const res = await axios.get(`http://localhost:3001/api/dashboard/estatisticas/${empresaId}?dias=${periodo}`);
+      const res = await axios.get(`${API_URL}/api/dashboard/estatisticas/${empresaId}?dias=${periodo}`);
       setDados(res.data);
     } catch (erro) {
       console.error("Erro ao carregar dashboard:", erro);
@@ -57,7 +58,7 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
     try {
       if (tipo === 'bloquear_hora') {
         const fim = new Date(agora.getTime() + 60 * 60 * 1000);
-        await axios.post('http://localhost:3001/api/negocio/bloqueios', {
+        await axios.post(`${API_URL}/api/negocio/bloqueios`, {
           empresaId,
           inicio: agora,
           fim,
@@ -67,7 +68,7 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
       } else if (tipo === 'fechar_hoje') {
         const fimDia = new Date();
         fimDia.setHours(23, 59, 59, 999);
-        await axios.post('http://localhost:3001/api/negocio/bloqueios', {
+        await axios.post(`${API_URL}/api/negocio/bloqueios`, {
           empresaId,
           inicio: agora,
           fim: fimDia,
@@ -87,7 +88,7 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
     if (!novaMeta || novaMeta <= 0) return setEditandoMeta(false);
     setEstaProcessando(true);
     try {
-      await axios.put(`http://localhost:3001/api/negocio/info/${usuario.empresaId}`, {
+      await axios.put(`${API_URL}/api/negocio/info/${usuario.empresaId}`, {
          metaMensal: parseInt(novaMeta)
       });
       await carregarEstatisticas(); // Recarregar KPIs

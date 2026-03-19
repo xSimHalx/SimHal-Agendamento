@@ -8,8 +8,9 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useTermos } from '../../hooks/useTermos';
+import API_URL from '../../servicos/api';
 
-const API_URL = 'http://localhost:3001/api/clientes';
+const API_BASE = `${API_URL}/api/clientes`;
 
 export default function VisaoClientes({ empresa }) {
   const empresaId = empresa?.id;

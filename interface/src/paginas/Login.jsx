@@ -10,8 +10,9 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API_URL from '../servicos/api';
 
-const API_URL = 'http://localhost:3001/api/autenticacao';
+const API_BASE = `${API_URL}/api/autenticacao`;
 
 export default function Login() {
   const navegar = useNavigate();
@@ -41,7 +42,7 @@ export default function Login() {
 
     try {
       if (estaNoLogin) {
-        const resposta = await axios.post(`${API_URL}/login`, {
+        const resposta = await axios.post(`${API_BASE}/login`, {
           email: emailLogin,
           senha: senhaLogin
         });
@@ -51,7 +52,7 @@ export default function Login() {
         alert('Bem-vindo ao sistema!');
         navegar('/admin');
       } else {
-        await axios.post(`${API_URL}/registrar`, {
+        await axios.post(`${API_BASE}/registrar`, {
           nome: nomeRegistro,
           empresa: empresaRegistro,
           email: emailRegistro,

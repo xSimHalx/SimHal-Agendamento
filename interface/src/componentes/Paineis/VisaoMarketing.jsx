@@ -4,6 +4,7 @@ import {
     Search, AlertCircle, Clock, Copy, Check, Target, Loader2, X, Trash2
 } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 
 export default function VisaoMarketing({ empresaId }) {
     const [abaAtiva, setAbaAtiva] = useState('retencao'); // 'retencao' ou 'cupons'
@@ -26,8 +27,8 @@ export default function VisaoMarketing({ empresaId }) {
         try {
             setCarregando(true);
             const [resClientes, resCupons] = await Promise.all([
-                axios.get(`http://localhost:3001/api/negocio/marketing/clientes-sumidos/${empresaId}`),
-                axios.get(`http://localhost:3001/api/negocio/marketing/cupons/${empresaId}`)
+                axios.get(`${API_URL}/api/negocio/marketing/clientes-sumidos/${empresaId}`),
+                axios.get(`${API_URL}/api/negocio/marketing/cupons/${empresaId}`)
             ]);
             setClientesSumidos(resClientes.data);
             setCupons(resCupons.data);
@@ -45,7 +46,7 @@ export default function VisaoMarketing({ empresaId }) {
     const handleCriarCupom = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3001/api/negocio/marketing/cupons', {
+            await axios.post(`${API_URL}/api/negocio/marketing/cupons`, {
                 ...novoCupom,
                 empresaId
             });
@@ -60,7 +61,7 @@ export default function VisaoMarketing({ empresaId }) {
     const handleExcluirCupom = async (id) => {
         if (!confirm("Tem certeza que deseja excluir permanentemente este cupom?")) return;
         try {
-            await axios.delete(`http://localhost:3001/api/negocio/marketing/cupons/${id}`);
+            await axios.delete(`${API_URL}/api/negocio/marketing/cupons/${id}`);
             carregarDados();
         } catch (erro) {
             alert("Erro ao excluir cupom.");
@@ -69,7 +70,7 @@ export default function VisaoMarketing({ empresaId }) {
 
     const handleToggleStatus = async (id) => {
         try {
-            await axios.patch(`http://localhost:3001/api/negocio/marketing/cupons/${id}/toggle-status`);
+            await axios.patch(`${API_URL}/api/negocio/marketing/cupons/${id}/toggle-status`);
             carregarDados();
         } catch (erro) {
             alert("Erro ao alterar status do cupom.");

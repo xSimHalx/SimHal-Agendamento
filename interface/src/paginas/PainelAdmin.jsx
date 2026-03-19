@@ -12,6 +12,7 @@ import {
   Link as LinkIcon, Zap, ShieldAlert, HelpCircle, LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API_URL from '../servicos/api';
 
 // Importação das Visões (Paineis)
 import VisaoPainel from '../componentes/Paineis/VisaoPainel';
@@ -213,7 +214,7 @@ export default function PainelAdmin() {
         }
 
         // Agora buscamos pela empresa associada ao usuário logado
-        const resInfo = await axios.get(`http://localhost:3001/api/negocio/info/pelo-id/${user.empresaId}`);
+        const resInfo = await axios.get(`${API_URL}/api/negocio/info/pelo-id/${user.empresaId}`);
         setEmpresa(resInfo.data);
       } catch (erro) {
         console.error("Erro ao carregar dados do admin:", erro);
@@ -308,7 +309,7 @@ function DropdownNotificacoes({ empresaId }) {
   const fetchNotificacoes = async () => {
     try {
       setCarregando(true);
-      const response = await axios.get(`http://localhost:3001/api/negocio/notificacoes/${empresaId}`);
+      const response = await axios.get(`${API_URL}/api/negocio/notificacoes/${empresaId}`);
       setNotificacoes(response.data);
     } catch (e) {
       console.error("Erro ao buscar notificações:", e);
@@ -319,7 +320,7 @@ function DropdownNotificacoes({ empresaId }) {
 
   const marcarComoLidas = async () => {
     try {
-      await axios.put(`http://localhost:3001/api/negocio/notificacoes/lidas/${empresaId}`);
+      await axios.put(`${API_URL}/api/negocio/notificacoes/lidas/${empresaId}`);
       setNotificacoes(prev => prev.map(n => ({ ...n, lida: true })));
     } catch (e) {
       console.error("Erro ao marcar como lidas:", e);

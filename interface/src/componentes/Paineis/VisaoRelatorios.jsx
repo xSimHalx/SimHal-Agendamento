@@ -22,6 +22,7 @@ import {
     Loader2
 } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 
 const CORES_PIE = ['#4f46e5', '#10b981', '#f59e0b', '#0ea5e9', '#64748b'];
 
@@ -33,7 +34,7 @@ export default function VisaoRelatorios({ empresaId }) {
     const carregarEstatisticas = async () => {
         try {
             setCarregando(true);
-            const res = await axios.get(`http://localhost:3001/api/negocio/relatorios/estatisticas/${empresaId}?periodo=${periodo}`);
+            const res = await axios.get(`${API_URL}/api/negocio/relatorios/estatisticas/${empresaId}?periodo=${periodo}`);
             setDados(res.data);
         } catch (erro) {
             console.error("Erro ao carregar relatórios:", erro);

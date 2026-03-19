@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Plus, Loader2, X } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 import { format, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -30,8 +31,8 @@ export default function VisaoFinanceiro({ empresaId }) {
         try {
             setCarregando(true);
             const [resTrans, resResumo] = await Promise.all([
-                axios.get(`http://localhost:3001/api/negocio/financeiro/transacoes/${empresaId}`),
-                axios.get(`http://localhost:3001/api/negocio/financeiro/resumo/${empresaId}`)
+                axios.get(`${API_URL}/api/negocio/financeiro/transacoes/${empresaId}`),
+                axios.get(`${API_URL}/api/negocio/financeiro/resumo/${empresaId}`)
             ]);
             setTransacoes(resTrans.data);
             setResumo(resResumo.data);
@@ -49,7 +50,7 @@ export default function VisaoFinanceiro({ empresaId }) {
     const handleCriarDespesa = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3001/api/negocio/financeiro/transacoes', {
+            await axios.post(`${API_URL}/api/negocio/financeiro/transacoes`, {
                 ...novaDespesa,
                 empresaId,
                 tipo: 'SAIDA',

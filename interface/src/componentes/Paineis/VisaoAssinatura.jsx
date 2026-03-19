@@ -5,6 +5,7 @@ import {
     ArrowRight, Loader2
 } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../../servicos/api';
 
 const PLANOS = [
     {
@@ -48,7 +49,7 @@ export default function VisaoAssinatura({ empresaId }) {
     const carregarDados = async () => {
         try {
             setCarregando(true);
-            const res = await axios.get(`http://localhost:3001/api/negocio/assinatura/${empresaId}`);
+            const res = await axios.get(`${API_URL}/api/negocio/assinatura/${empresaId}`);
             setDados(res.data);
         } catch (erro) {
             console.error("Erro ao carregar assinatura:", erro);
@@ -64,7 +65,7 @@ export default function VisaoAssinatura({ empresaId }) {
     const fazerUpgrade = async (novoPlano) => {
         try {
             setUpgrading(true);
-            await axios.patch(`http://localhost:3001/api/negocio/assinatura/plano/${empresaId}`, {
+            await axios.patch(`${API_URL}/api/negocio/assinatura/plano/${empresaId}`, {
                 novoPlano: novoPlano.toUpperCase()
             });
             await carregarDados();
