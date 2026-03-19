@@ -29,21 +29,23 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
 
   const corTema = CORES_CHART[usuario?.empresa?.corPrimaria] || CORES_CHART.indigo;
 
-  useEffect(() => {
+  const carregarEstatisticas = async () => {
     const empresaId = usuario?.empresa?.id;
-    const carregarEstatisticas = async () => {
-      setCarregando(true);
-      try {
-        const res = await axios.get(`http://localhost:3001/api/dashboard/estatisticas/${empresaId}?dias=${periodo}`);
-        setDados(res.data);
-      } catch (erro) {
-        console.error("Erro ao carregar dashboard:", erro);
-      } finally {
-        setCarregando(false);
-      }
-    };
+    if (!empresaId) return;
+    
+    setCarregando(true);
+    try {
+      const res = await axios.get(`http://localhost:3001/api/dashboard/estatisticas/${empresaId}?dias=${periodo}`);
+      setDados(res.data);
+    } catch (erro) {
+      console.error("Erro ao carregar dashboard:", erro);
+    } finally {
+      setCarregando(false);
+    }
+  };
 
-    if (empresaId) carregarEstatisticas();
+  useEffect(() => {
+    carregarEstatisticas();
   }, [usuario?.empresa?.id, periodo]);
 
   const executarAcaoRapida = async (tipo) => {
@@ -88,7 +90,7 @@ export default function VisaoPainel({ usuario, setAbaAtiva }) {
       await axios.put(`http://localhost:3001/api/negocio/info/${usuario.empresaId}`, {
          metaMensal: parseInt(novaMeta)
       });
-      await carregarDados(); // Recarregar KPIs
+      await carregarEstatisticas(); // Recarregar KPIs
       setEditandoMeta(false);
     } catch (erro) {
       console.error("Erro ao salvar meta:", erro);

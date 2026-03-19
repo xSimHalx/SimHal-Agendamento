@@ -7,10 +7,13 @@ import {
 import axios from 'axios';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useTermos } from '../../hooks/useTermos';
 
 const API_URL = 'http://localhost:3001/api/clientes';
 
-export default function VisaoClientes({ empresaId }) {
+export default function VisaoClientes({ empresa }) {
+  const empresaId = empresa?.id;
+  const t = useTermos(empresa);
   const [clientes, setClientes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState('');
@@ -119,14 +122,14 @@ export default function VisaoClientes({ empresaId }) {
       {/* Header */}
       <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
         <div>
-          <h1 className="text-2xl font-black text-slate-800 tracking-tight">CRM de Clientes</h1>
+          <h1 className="text-2xl font-black text-slate-800 tracking-tight">CRM de {t.Clientes}</h1>
           <p className="text-slate-500 font-medium">Gerencie o relacionamento e histórico da sua base.</p>
         </div>
         <button 
           onClick={() => abrirModal()}
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black text-sm shadow-lg shadow-indigo-100 flex items-center gap-2 transition-all active:scale-95"
         >
-          <Plus size={20}/> Novo Cliente
+          <Plus size={20}/> Novo {t.Cliente}
         </button>
       </div>
 
@@ -154,7 +157,7 @@ export default function VisaoClientes({ empresaId }) {
         ) : clientesFiltrados.length === 0 ? (
           <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
             <User className="mx-auto text-slate-200 mb-4" size={48} />
-            <p className="text-slate-400 font-bold">Nenhum cliente encontrado.</p>
+            <p className="text-slate-400 font-bold">Nenhum {t.cliente} encontrado.</p>
           </div>
         ) : (
           clientesFiltrados.map(c => (
@@ -322,7 +325,7 @@ export default function VisaoClientes({ empresaId }) {
                   onClick={() => abrirModal(clienteSelecionado)}
                   className="flex-1 flex items-center justify-center gap-2 bg-slate-900 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-100"
                 >
-                  <Edit size={18} /> Editar Cliente
+                  <Edit size={18} /> Editar {t.Cliente}
                 </button>
                 <button 
                   onClick={() => excluirCliente(clienteSelecionado.id)}
@@ -343,7 +346,7 @@ export default function VisaoClientes({ empresaId }) {
             <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                <div>
                   <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">{editando ? 'Editar CRM' : 'Novo Registro'}</h2>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Dados do Cliente</p>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Dados do {t.Cliente}</p>
                </div>
                <button onClick={() => setModalAberto(false)} className="p-3 hover:bg-white rounded-2xl transition-all shadow-sm border border-slate-100 bg-white/50"><X size={24} className="text-slate-400" /></button>
             </div>
@@ -378,7 +381,7 @@ export default function VisaoClientes({ empresaId }) {
                <div className="pt-4 flex gap-4">
                   <button type="button" onClick={() => setModalAberto(false)} className="flex-1 px-6 py-4 border-2 border-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-50 transition-all text-xs uppercase tracking-widest">Cancelar</button>
                   <button type="submit" disabled={estaSalvando} className="flex-[2] px-6 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 transition-all active:scale-95 text-xs uppercase tracking-widest">
-                     {estaSalvando ? <Loader2 size={18} className="animate-spin" /> : <><Save size={18} /> {editando ? 'Atualizar Ficha' : 'Salvar no CRM'}</>}
+                     {estaSalvando ? <Loader2 size={18} className="animate-spin" /> : <><Save size={18} /> {editando ? 'Atualizar Ficha' : `Salvar no CRM`}</>}
                   </button>
                </div>
             </form>

@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { 
   Mail, Lock, Eye, EyeOff, 
-  CalendarDays, ArrowRight, Loader2, ShieldCheck, User, Store 
+  CalendarDays, ArrowRight, Loader2, ShieldCheck, User, Store, ArrowLeft
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -191,6 +191,15 @@ export default function Login() {
         `}
       >
         <div className="max-w-md w-full mx-auto">
+          {/* Botão Voltar */}
+          <button 
+            onClick={() => navegar('/')}
+            className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 font-bold text-sm mb-8 transition-colors group"
+          >
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            Voltar para lojas parceiras
+          </button>
+
           {/* Logo fixa */}
           <div className="flex items-center gap-2 mb-10">
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-lg transition-colors duration-[800ms] ${estaNoLogin ? 'bg-indigo-600 shadow-indigo-200' : 'bg-slate-900 shadow-slate-200'}`}>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Users, BookOpen, ShoppingCart, Clock, Contact,
   ChevronLeft, X, ArrowRight, Check, Calendar as CalendarIcon,
-  MapPin, Instagram, Facebook, Smartphone
+  MapPin, Instagram, Facebook, Smartphone, ArrowLeft,
+  QrCode, Copy, ShieldCheck, Loader2, Plus
 } from 'lucide-react';
 import { 
   format, 
@@ -19,6 +20,7 @@ import {
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import axios from 'axios';
+import { useTermos } from '../hooks/useTermos';
 
 // Formatador de Moeda
 const formatarMoeda = (valor) => {
@@ -28,14 +30,19 @@ const formatarMoeda = (valor) => {
 // Removido MOCK_DIAS estático
 
 export default function AgendamentoCliente() {
+  const navigate = useNavigate();
+  const { slug: urlSlug } = useParams();
+  
   // ==========================================
   // ESTADOS (API E DADOS)
   // ==========================================
   const [empresa, setEmpresa] = useState(null);
+  const t = useTermos(empresa);
   const [profissionais, setProfissionais] = useState([]);
   const [servicos, setServicos] = useState([]);
   const [adicionais, setAdicionais] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [camposFormulario, setCamposFormulario] = useState([]);
   
   // Disponibilidade
   const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
@@ -54,6 +61,12 @@ export default function AgendamentoCliente() {
   const [dataSelecionada, setDataSelecionada] = useState(null); // Agora é um objeto Date
   const [horarioSelecionado, setHorarioSelecionado] = useState(null);
   const [dadosCliente, setDadosCliente] = useState({ nome: '', sobrenome: '', telefone: '' });
+  const [respostasExtras, setRespostasExtras] = useState({});
+  const [linkWhatsApp, setLinkWhatsApp] = useState(null);
+  
+  // Checkout
+  const [pagamento, setPagamento] = useState(null);
+  const [carregandoPagamento, setCarregandoPagamento] = useState(false);
 
   const CORES_TEMA = {
     indigo: { primary: '#4f46e5', secondary: '#4338ca', light: '#eef2ff' },
@@ -61,8 +74,6 @@ export default function AgendamentoCliente() {
     emerald: { primary: '#10b981', secondary: '#047857', light: '#ecfdf5' },
     slate: { primary: '#334155', secondary: '#1e293b', light: '#f8fafc' }
   };
-
-  const { slug: urlSlug } = useParams();
 
   useEffect(() => {
     const carregarDadosIniciais = async () => {
@@ -87,6 +98,14 @@ export default function AgendamentoCliente() {
         setProfissionais(Array.isArray(resPros.data) ? resPros.data : []);
         setServicos(Array.isArray(servicosApi) ? servicosApi : []);
         setAdicionais(Array.isArray(adicionaisApi) ? adicionaisApi : []);
+
+        // 3. Buscar Campos Personalizados do Formulário
+        try {
+          const resCampos = await axios.get(`http://localhost:3001/api/negocio/campos-formulario/${dadosEmpresa.id}`);
+          setCamposFormulario(resCampos.data || []);
+        } catch (e) {
+          console.error("Erro ao buscar campos extras:", e);
+        }
       } catch (erro) {
         console.error("Erro ao carregar dados do agendamento:", erro);
         // Resetar para arrays vazios em caso de erro crítico
@@ -192,13 +211,28 @@ export default function AgendamentoCliente() {
       case 1: return !profissionalSelecionado;
       case 2: return !servicoSelecionado;
       case 4: return !dataSelecionada || !horarioSelecionado;
-      case 5: return !dadosCliente.nome || !dadosCliente.telefone;
+      case 5: {
+        const baseValido = dadosCliente.nome && dadosCliente.telefone;
+        if (!baseValido) return true;
+        
+        // Validar campos obrigatórios dinâmicos
+        const faltamObrigatorios = camposFormulario.some(campo => 
+          campo.obrigatorio && !respostasExtras[campo.id]
+        );
+        return faltamObrigatorios;
+      }
       default: return false;
     }
   };
 
   // Ação Final: Confirmar Agendamento no Banco
   const confirmarAgendamento = async () => {
+    // Se a empresa exige pagamento e ainda não foi gerado/pago
+    if (empresa.exigirPagamentoAntecipado && !pagamento) {
+      gerarCobranca();
+      return;
+    }
+
     setCarregando(true);
     try {
       const payload = {
@@ -219,16 +253,53 @@ export default function AgendamentoCliente() {
           parseInt(horarioSelecionado.split(':')[1])
         ).toISOString(),
         adicionaisIds: adicionaisSelecionados.map(a => a.id),
-        valorTotal: calcularTotal()
+        valorTotal: calcularTotal(),
+        respostasExtras
       };
 
-      await axios.post('http://localhost:3001/api/negocio/agendamentos', payload);
-      proximaEtapa(); // Vai para a tela de sucesso (etapa 6)
+      const response = await axios.post('http://localhost:3001/api/negocio/agendamentos', payload);
+      if (response.data.linkWhatsApp) {
+        setLinkWhatsApp(response.data.linkWhatsApp);
+      }
+      setEtapa(7); // Sucesso é agora 7
     } catch (erro) {
       console.error("Erro ao confirmar agendamento:", erro);
-      alert("Houve um erro ao realizar o agendamento. Tente novamente.");
+      const msg = erro.response?.data?.erro || "Houve um erro ao realizar o agendamento.";
+      const detalhe = erro.response?.data?.detalhe || "Tente novamente.";
+      alert(`${msg}\n${detalhe}`);
     } finally {
       setCarregando(false);
+    }
+  };
+
+  const gerarCobranca = async () => {
+    setCarregandoPagamento(true);
+    try {
+        const res = await axios.post('http://localhost:3001/api/negocio/checkout/preferencia', {
+            empresaId: empresa.id,
+            valorCentavos: calcularTotal(),
+            servicoNome: servicoSelecionado.nome
+        });
+        setPagamento(res.data);
+        setEtapa(6); // Etapa de Pagamento
+    } catch (erro) {
+        alert("Erro ao gerar pagamento. Tente novamente.");
+    } finally {
+        setCarregandoPagamento(false);
+    }
+  };
+
+  const verificarPagamento = async () => {
+    setCarregandoPagamento(true);
+    try {
+        // Simulação de verificação
+        await axios.get(`http://localhost:3001/api/negocio/checkout/status/${pagamento.id}`);
+        // Após "verificar", procedemos com a confirmação do agendamento
+        confirmarAgendamento();
+    } catch (erro) {
+        alert("Pagamento não identificado.");
+    } finally {
+        setCarregandoPagamento(false);
     }
   };
 
@@ -247,28 +318,37 @@ export default function AgendamentoCliente() {
   // 1. COLUNA ESQUERDA (Informativa)
   const renderizarPainelEsquerdo = () => {
     const infoEtapa = {
-      1: { icone: Users, titulo: 'Barbeiro', desc: 'Selecione o barbeiro que deseja ser atendido.' },
-      2: { icone: BookOpen, titulo: 'Serviço', desc: 'Selecione o serviço que deseja agendar um horário.' },
-      3: { icone: ShoppingCart, titulo: 'Serviços Adicionais', desc: 'Selecione serviços adicionais caso queira incluir no agendamento.' },
-      4: { icone: Clock, titulo: 'Data e Horário', desc: 'Datas em verde possuem disponibilidade de horário para agendamento.' },
-      5: { icone: Contact, titulo: 'Cadastro', desc: 'Por favor, digite suas informações de contato para confirmarmos o agendamento.' },
-      6: { icone: Check, titulo: 'Concluído', desc: 'Seu agendamento foi realizado com sucesso!' }
+      1: { icone: Users, titulo: t.Profissional, desc: `Selecione o ${t.profissional} que deseja ser atendido.` },
+      2: { icone: BookOpen, titulo: t.Servico, desc: `Selecione o ${t.servico} que deseja agendar um horário.` },
+      3: { icone: ShoppingCart, titulo: `${t.Servicos} Adicionais`, desc: `Selecione ${t.servicos} adicionais caso queira incluir no ${t.agendamento}.` },
+      4: { icone: Clock, titulo: 'Data e Horário', desc: `Datas em verde possuem disponibilidade de horário para ${t.agendamento}.` },
+      5: { icone: Contact, titulo: 'Cadastro', desc: `Por favor, digite suas informações de contato para confirmarmos o ${t.agendamento}.` },
+      6: { icone: ShieldCheck, titulo: 'Pagamento', desc: 'Sua reserva está quase pronta! Realize o pagamento via PIX para garantir sua vaga.' },
+      7: { icone: Check, titulo: 'Concluído', desc: `Seu ${t.agendamento} foi realizado com sucesso!` }
     }[etapa];
 
     const Icone = infoEtapa.icone;
 
     return (
       <div className="w-full lg:w-[280px] bg-[#f8f9fa] p-8 flex flex-col items-center text-center border-r border-slate-200">
+        <button 
+          onClick={() => navigate('/')}
+          className="mb-8 flex items-center gap-2 text-slate-400 hover:text-slate-800 font-bold text-[11px] uppercase tracking-widest transition-colors group"
+        >
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+          Ver outras lojas
+        </button>
+
         <div className="flex gap-2 mb-12">
-          {[1, 2, 3, 4, 5].map(s => (
-            <div key={s} className={`w-2 h-2 rounded-full transition-colors ${s === etapa ? 'bg-slate-700' : 'bg-slate-300'}`} />
+          {[1, 2, 3, 4, 5, 6].map(s => (
+            <div key={s} className={`w-2 h-2 rounded-full transition-colors ${s === etapa ? 'bg-primary' : 'bg-slate-300'}`} />
           ))}
         </div>
         <div className="flex flex-col items-center flex-1">
           {empresa.logo ? (
             <img src={empresa.logo} alt={empresa.nome} className="w-20 h-20 object-contain mb-4 p-2 bg-white rounded-2xl shadow-sm border border-slate-100" />
           ) : (
-            <Icone size={48} className="text-slate-700 mb-6" strokeWidth={1.5} />
+            <Icone size={48} className="text-primary mb-6" strokeWidth={1.5} />
           )}
           <h2 className="text-xl font-bold text-slate-800 mb-2">{infoEtapa.titulo}</h2>
           <p className="text-sm text-slate-500 leading-relaxed">{infoEtapa.desc}</p>
@@ -332,14 +412,24 @@ export default function AgendamentoCliente() {
   // 2. COLUNA CENTRAL (Conteúdo Dinâmico)
   const renderizarPainelCentral = () => {
     const titulos = {
-      1: 'Selecione o Barbeiro', 2: 'Selecione o Serviço', 3: 'Serviços Adicionais', 4: 'Selecione a Data e Horário', 5: 'Preencha Seus Dados', 6: 'Resumo do Pedido'
+      1: `Selecione o ${t.Profissional}`, 
+      2: `Selecione o ${t.Servico}`, 
+      3: `${t.Servicos} Adicionais`, 
+      4: 'Selecione a Data e Horário', 
+      5: 'Preencha Seus Dados', 
+      6: 'Pagamento via PIX', 
+      7: `${t.Agendamento} Confirmado`
     };
 
     const proximoDesabilitado = () => {
       if (etapa === 1 && !profissionalSelecionado) return true;
       if (etapa === 2 && !servicoSelecionado) return true;
       if (etapa === 4 && (!dataSelecionada || !horarioSelecionado)) return true;
-      if (etapa === 5 && (!dadosCliente.nome || !dadosCliente.telefone)) return true;
+      if (etapa === 5) {
+        if (!dadosCliente.nome || !dadosCliente.telefone) return true;
+        const faltamObrigatorios = camposFormulario.some(c => c.obrigatorio && !respostasExtras[c.id]);
+        return faltamObrigatorios;
+      }
       return false;
     };
 
@@ -526,20 +616,30 @@ export default function AgendamentoCliente() {
                         <p className="font-bold text-sm">Buscando horários...</p>
                       </div>
                     ) : horariosDisponiveis.length > 0 ? (
-                      horariosDisponiveis.map(hora => (
-                        <button
-                          key={hora}
-                          onClick={() => setHorarioSelecionado(hora)}
-                          className={`py-3 rounded-xl font-bold text-sm transition-all ${
-                            horarioSelecionado === hora 
-                            ? 'bg-emerald-500 text-white shadow-lg scale-105 border-emerald-600' 
-                            : 'bg-white text-slate-600 hover:bg-[var(--cor-light)] hover:text-primary border border-slate-200 shadow-sm'
-                          }`}
-                        >
-                          {horarioSelecionado === hora && <span className="block text-[9px] uppercase font-black text-emerald-100 mb-0.5 tracking-wider">Selecionado</span>}
-                          {hora}
-                        </button>
-                      ))
+                      horariosDisponiveis.map(slot => {
+                        const isObject = typeof slot === 'object';
+                        const horaTexto = isObject ? slot.inicio : slot;
+                        const selecionado = horarioSelecionado === horaTexto;
+
+                        return (
+                          <button
+                            key={horaTexto}
+                            onClick={() => setHorarioSelecionado(horaTexto)}
+                            className={`flex flex-col items-center justify-center p-3 rounded-xl font-bold transition-all border ${
+                              selecionado 
+                              ? 'bg-primary text-white shadow-lg scale-105 border-primary/20' 
+                              : 'bg-white text-slate-600 hover:bg-[var(--cor-light)] hover:text-primary border-slate-200 shadow-sm'
+                            }`}
+                          >
+                            <span className="text-sm">{horaTexto}</span>
+                            {isObject && slot.vagasRestantes !== undefined && (
+                              <span className={`text-[9px] uppercase font-black mt-1 ${selecionado ? 'text-white/80' : 'text-slate-400'}`}>
+                                {slot.vagasRestantes} {slot.vagasRestantes === 1 ? 'vaga' : 'vagas'}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })
                     ) : (
                       <div className="col-span-3 py-10 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl bg-slate-50 flex flex-col items-center gap-2">
                         <CalendarIcon size={24} className="text-slate-300" />
@@ -583,40 +683,121 @@ export default function AgendamentoCliente() {
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-[var(--cor-light)] outline-none transition-all font-medium text-slate-800"
                 />
               </div>
+
+              {/* CAMPOS PERSONALIZADOS (DINÂMICOS) */}
+              {camposFormulario.length > 0 && (
+                <div className="pt-4 border-t border-dashed border-slate-200 mt-4 space-y-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Plus size={10} /> Informações Adicionais
+                  </p>
+                  <div className="grid grid-cols-1 gap-4">
+                    {camposFormulario.map(campo => (
+                      <div key={campo.id}>
+                        <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">
+                          {campo.label} {campo.obrigatorio && <span className="text-rose-400">*</span>}
+                        </label>
+                        <input 
+                          type={campo.tipo === 'NUMBER' ? 'number' : 'text'}
+                          value={respostasExtras[campo.id] || ''}
+                          onChange={(e) => setRespostasExtras({...respostasExtras, [campo.id]: e.target.value})}
+                          placeholder={campo.obrigatorio ? '(Obrigatório)' : ''}
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-primary focus:ring-2 focus:ring-[var(--cor-light)] outline-none transition-all font-medium text-slate-800"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           {etapa === 6 && (
+            <div className="flex flex-col items-center justify-center h-full space-y-6 py-4 animate-in fade-in zoom-in-95">
+               <div className="bg-[var(--cor-light)] p-4 rounded-3xl border-2 border-primary/20 text-center space-y-2">
+                  <p className="text-[10px] font-black uppercase text-primary tracking-widest">Valor a Pagar</p>
+                  <p className="text-3xl font-black text-slate-800">{formatarMoeda(calcularTotal())}</p>
+               </div>
+
+               <div className="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm relative group">
+                  <div className="w-48 h-48 bg-slate-50 flex items-center justify-center rounded-xl overflow-hidden border border-slate-200">
+                     <QrCode size={140} className="text-slate-800" />
+                     {/* Overlay Simulado */}
+                     <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center p-4 text-center">
+                        <p className="text-[10px] font-black uppercase text-slate-600">Escaneie o código no seu app do banco</p>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="w-full max-w-xs space-y-3">
+                  <button 
+                    onClick={() => { navigator.clipboard.writeText(pagamento?.pixCopiaECola); alert("Código PIX copiado!"); }}
+                    className="w-full flex items-center justify-center gap-2 bg-slate-100 text-slate-600 p-3 rounded-xl font-bold text-xs hover:bg-slate-200 transition-all"
+                  >
+                    <Copy size={16} /> Copiar Código PIX
+                  </button>
+                  
+                  <button 
+                    disabled={carregandoPagamento}
+                    onClick={verificarPagamento}
+                    className="w-full bg-emerald-500 text-white p-4 rounded-xl font-black text-sm shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all flex items-center justify-center gap-2"
+                  >
+                    {carregandoPagamento ? <Loader2 className="animate-spin" size={20} /> : 'Já realizei o pagamento'}
+                  </button>
+               </div>
+               
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight italic">
+                  * Sua vaga será confirmada instantaneamente após o pagamento.
+               </p>
+            </div>
+          )}
+
+          {etapa === 7 && (
             <div className="text-center py-12 flex flex-col items-center justify-center h-full">
                <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
                 <Check size={48} strokeWidth={3} />
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Agendamento Confirmado!</h2>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.Agendamento} Confirmado!</h2>
               <p className="text-slate-600 mb-8 max-w-sm">
-                Tudo certo, {dadosCliente.nome}! Te esperamos na barbearia. Os detalhes foram enviados para seu WhatsApp.
+                Tudo certo, {dadosCliente.nome}! Te esperamos em breve.
               </p>
-              <button onClick={() => window.location.reload()} className="bg-slate-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-700 transition-colors">
-                Voltar ao Início
+              
+              {linkWhatsApp && (
+                <div className="mb-8 w-full max-w-xs space-y-3">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ação Necessária</p>
+                  <a 
+                    href={linkWhatsApp}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white p-4 rounded-xl font-black text-sm shadow-lg shadow-emerald-100 transition-all active:scale-95"
+                  >
+                    <Smartphone size={18} /> Confirmar via WhatsApp
+                  </a>
+                  <p className="text-[10px] text-slate-400 font-medium">Clique para nos avisar que está vindo!</p>
+                </div>
+              )}
+
+              <button onClick={() => window.location.reload()} className="text-primary hover:underline font-bold text-sm">
+                Realizar outro Agendamento
               </button>
             </div>
           )}
 
         </div>
 
-        {etapa < 6 && (
+        {etapa < 7 && (
           <div className="px-8 py-5 border-t border-slate-200 flex justify-between items-center bg-white">
-            {etapa > 1 ? (
+            {(etapa > 1 && etapa !== 6) ? (
               <button onClick={etapaAnterior} className="flex items-center text-slate-600 font-bold hover:text-slate-800 transition-colors">
                 <ChevronLeft size={20} className="mr-1" /> Voltar
               </button>
             ) : <div />}
 
             <button 
-              disabled={proximoDesabilitado()}
+              disabled={proximoDesabilitado() || carregandoPagamento}
               onClick={etapa === 5 ? confirmarAgendamento : proximaEtapa} 
-              className="flex items-center bg-slate-800 disabled:bg-slate-300 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-slate-700 transition-colors"
+              className="flex items-center bg-primary hover:brightness-110 disabled:bg-slate-300 text-white px-6 py-2.5 rounded-lg font-bold transition-colors shadow-lg"
             >
-              {etapa === 5 ? 'Confirmar Reserva' : 'Próximo'} <ArrowRight size={18} className="ml-2" />
+              {carregandoPagamento ? <Loader2 className="animate-spin" size={18} /> : (etapa === 5 ? (empresa.exigirPagamentoAntecipado ? 'Ir para Pagamento' : 'Confirmar Reserva') : 'Próximo')} <ArrowRight size={18} className="ml-2" />
             </button>
           </div>
         )}
@@ -635,21 +816,21 @@ export default function AgendamentoCliente() {
         <div className="space-y-6 flex-1">
           {profissionalSelecionado && (
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Barbeiro</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t.Profissional}</p>
               <p className="font-bold text-slate-800 border-b border-slate-200 pb-2">{profissionalSelecionado.nome}</p>
             </div>
           )}
 
           {servicoSelecionado && (
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Serviço</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t.Servico}</p>
               <p className="font-bold text-slate-800 border-b border-slate-200 pb-2">{servicoSelecionado.nome}</p>
             </div>
           )}
 
           {adicionaisSelecionados.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Adicionais</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t.Servicos} Adicionais</p>
               <div className="border-b border-slate-200 pb-2">
                 {adicionaisSelecionados.map(ex => (
                   <p key={ex.id} className="font-bold text-slate-800 flex justify-between">

@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { registrarLog } = require('../utilitarios/auditoria');
 
 const prisma = new PrismaClient();
 
@@ -94,6 +95,9 @@ const AutenticacaoControlador = {
         process.env.JWT_SECRET,
         { expiresIn: '1d' }
       );
+
+      // Registrar Log de Auditoria
+      registrarLog(usuario.empresaId, usuario.nome, 'Realizou login no sistema', 'INFO');
 
       return res.json({
         mensagem: 'Login realizado!',

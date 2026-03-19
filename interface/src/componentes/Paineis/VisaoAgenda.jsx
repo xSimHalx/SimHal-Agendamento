@@ -7,6 +7,7 @@ import {
 import { format, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ModalNovoAgendamento from '../Modais/ModalNovoAgendamento';
+import { useTermos } from '../../hooks/useTermos';
 
 const CORES_STATUS = {
   PENDENTE: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -21,12 +22,15 @@ const HORAS = [
   '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00'
 ];
 
-export default function VisaoAgenda({ empresaId, profissionalId }) {
+export default function VisaoAgenda({ empresa, profissionalId }) {
+  const empresaId = empresa?.id;
+  const t = useTermos(empresa);
   const [dataSelecionada, setDataSelecionada] = useState(new Date());
   const [agendamentos, setAgendamentos] = useState([]);
   const [bloqueios, setBloqueios] = useState([]);
   const [profissionais, setProfissionais] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [camposDefinicao, setCamposDefinicao] = useState([]);
   const [agendamentoAtivo, setAgendamentoAtivo] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
   const [dataAberturaModal, setDataAberturaModal] = useState(null);
@@ -37,10 +41,11 @@ export default function VisaoAgenda({ empresaId, profissionalId }) {
     if (!empresaId) return;
     setCarregando(true);
     try {
-      const [resP, resA, resB] = await Promise.all([
+      const [resP, resA, resB, resC] = await Promise.all([
         axios.get(`http://localhost:3001/api/negocio/profissionais/${empresaId}`),
         axios.get(`http://localhost:3001/api/negocio/agendamentos/dia/${empresaId}?data=${format(dataSelecionada, 'yyyy-MM-dd')}`),
-        axios.get(`http://localhost:3001/api/negocio/bloqueios/${empresaId}`)
+        axios.get(`http://localhost:3001/api/negocio/bloqueios/${empresaId}`),
+        axios.get(`http://localhost:3001/api/negocio/campos-formulario/${empresaId}`)
       ]);
 
       let listaPros = resP.data;
@@ -51,6 +56,7 @@ export default function VisaoAgenda({ empresaId, profissionalId }) {
       setProfissionais(listaPros);
       setAgendamentos(resA.data);
       setBloqueios(resB.data);
+      setCamposDefinicao(resC.data || []);
     } catch (erro) {
       console.error("Erro na agenda:", erro);
     } finally {
@@ -151,7 +157,7 @@ export default function VisaoAgenda({ empresaId, profissionalId }) {
             onClick={() => setModalAberto(true)}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-black text-sm shadow-lg shadow-indigo-100 transition-all active:scale-95"
           >
-            <Plus size={18} /> Novo Agendamento
+            <Plus size={18} /> Novo {t.Agendamento}
           </button>
         </div>
       </div>
@@ -183,7 +189,7 @@ export default function VisaoAgenda({ empresaId, profissionalId }) {
                 {profissionais.map(p => (
                   <div key={p.id} className="min-w-[200px] flex-1 border-r border-slate-100 p-3 text-center">
                     <p className="text-sm font-black text-slate-800">{p.nome}</p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">{p.papel || 'Profissional'}</p>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">{p.papel || t.Profissional}</p>
                   </div>
                 ))}
               </div>
@@ -318,19 +324,39 @@ export default function VisaoAgenda({ empresaId, profissionalId }) {
                 <div className="flex items-center gap-3 text-slate-600 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
                   <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600"><Info size={18} /></div>
                   <div>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Serviço</p>
-                    <p className="text-sm font-bold text-slate-800">{agendamentoAtivo.servico.nome}</p>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{t.Servico}</p>
+                  <p className="text-sm font-bold text-slate-800">{agendamentoAtivo.servico.nome}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 text-slate-600 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
                   <div className="p-2 bg-amber-50 rounded-lg text-amber-600"><User size={18} /></div>
                   <div>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Profissional</p>
-                    <p className="text-sm font-bold text-slate-800">{agendamentoAtivo.profissional.nome}</p>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{t.Profissional}</p>
+                  <p className="text-sm font-bold text-slate-800">{agendamentoAtivo.profissional.nome}</p>
                   </div>
                 </div>
               </div>
+
+              {/* Respostas Extras (Campos Personalizados) */}
+              {agendamentoAtivo.respostasExtras && Object.keys(agendamentoAtivo.respostasExtras).length > 0 && (
+                <div className="pt-4 border-t border-slate-100 mt-4 space-y-3">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                     <Plus size={10} /> Informações do {t.Agendamento}
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {Object.entries(agendamentoAtivo.respostasExtras).map(([campoId, valor]) => {
+                      const definicao = camposDefinicao.find(c => c.id === campoId);
+                      return (
+                        <div key={campoId} className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{definicao?.label || 'Campo Extra'}</p>
+                           <p className="text-sm font-black text-slate-800">{valor || 'Não informado'}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="pt-4 border-t border-slate-100">
                 <p className="text-xs text-slate-400 font-black uppercase tracking-widest mb-4">Gerenciar Status</p>

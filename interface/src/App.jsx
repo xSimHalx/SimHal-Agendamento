@@ -3,18 +3,16 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './paginas/Login';
 import AgendamentoCliente from './paginas/AgendamentoCliente';
 import PainelAdmin from './paginas/PainelAdmin';
-import NavegacaoDebug from './componentes/NavegacaoDebug';
+import PaginaInicial from './paginas/PaginaInicial';
 
 function App() {
   return (
     <Router>
-      <NavegacaoDebug />
       <Routes>
-        <Route path="/:slug" element={<AgendamentoCliente />} />
+        <Route path="/" element={<PaginaInicial />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<PainelAdmin />} />
-        {/* Fallback para redirecionar para a barbearia padrão de testes se acessar a raiz sem slug */}
-        <Route path="/" element={<AgendamentoCliente />} /> 
+        <Route path="/:slug" element={<AgendamentoCliente />} />
       </Routes>
     </Router>
   );

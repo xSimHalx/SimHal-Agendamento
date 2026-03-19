@@ -8,31 +8,71 @@ datasource db {
 }
 
 model Empresa {
-  id               String        @id @default(uuid())
-  nome             String
-  slug             String        @unique
-  logo             String?
-  telefone         String?
-  corPrimaria      String?       @default("indigo")
-  endereco         String?
-  instagram        String?
-  facebook         String?
-  planoAtual       String        @default("TRIAL")
-  statusAssinatura String        @default("ATIVO")
-  dataVencimento   DateTime?
-  criadoEm         DateTime      @default(now())
-  atualizadoEm     DateTime      @updatedAt
-  adicionais       Adicional[]
-  agendamentos     Agendamento[]
-  clientes         Cliente[]
-  servicos         Servico[]
-  transacoes       Transacao[]
-  usuarios         Usuario[]
-  horarioFuncionamento Json?
-  metaMensal      Int           @default(5000)
-  bloqueios        BloqueioAgenda[]
+  id                    String      @id @default(uuid())
+  nome                  String
+  slug                  String      @unique
+  cnpj                  String?
+  telefone              String?
+  endereco              String?
+  logo                  String?     // URL da imagem
+  corPrimaria           String?     @default("indigo")
+  instagram             String?
+  facebook              String?
+  horarioFuncionamento  Json?       // Estrutura de horários semanais
+  
+  // Gestão de Assinatura (SaaS)
+  plano                 String      @default("TRIAL") // TRIAL, STARTER, PRO, PREMIUM
+  statusAssinatura      String      @default("ATIVO") // ATIVO, CANCELADO, INADIMPLENTE
+  dataVencimento        DateTime?
+  
+  // Configurações de Negócio
+  exigirPagamentoAntecipado Boolean @default(false)
+  customLabels              Json?    // Ex: { "profissional": "Barbeiro", "servico": "Serviço", "cliente": "Cliente" }
+  
+  // Configurações de Automação
+  autoLembrete          Boolean     @default(true)
+  autoAniversario       Boolean     @default(false)
+  autoAvaliacao         Boolean     @default(true)
+  autoBloqueioFalta     Boolean     @default(false)
+  
+  // Integração WhatsApp API (Evolution, WPPConnect, etc)
+  whatsappApiUrl        String?
+  whatsappApiToken      String?
+  whatsappInstanceName  String?
+  msgBoasVindasAtiva    Boolean     @default(false)
+  msgLembreteAtiva      Boolean     @default(false)
+
+  usuarios              Usuario[]
+  servicos              Servico[]
+  agendamentos          Agendamento[]
+  bloqueios             BloqueioAgenda[]
+  transacoes            Transacao[]
+  clientes              Cliente[]
+  cupons                Cupom[]
+  logsAuditoria         LogAuditoria[]
+  chamadosSuporte       ChamadoSuporte[]
+  faturas               Fatura[]
+  adicionais            Adicional[]
+  camposFormulario      CampoFormulario[]
+  notificacoes          Notificacao[]
+
+  criadoEm              DateTime    @default(now())
+  atualizadoEm          DateTime    @updatedAt
 
   @@map("empresas")
+}
+
+model Fatura {
+  id          String    @id @default(uuid())
+  codigo      String    @unique // Ex: FAT-2026-001
+  data        DateTime  @default(now())
+  valor       Int       // Em centavos
+  status      String    @default("PAGO") // PAGO, PENDENTE, CANCELADO
+  plano       String
+  empresaId   String
+  empresa     Empresa   @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@map("faturas")
 }
 
 model Usuario {
@@ -57,15 +97,17 @@ model Usuario {
 }
 
 model Servico {
-  id           String        @id @default(uuid())
-  nome         String
-  descricao    String?
-  duracao      Int
-  preco        Int
-  ativo        Boolean       @default(true)
-  empresaId    String
-  agendamentos Agendamento[]
-  empresa      Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  id                String        @id @default(uuid())
+  nome              String
+  descricao         String?
+  duracao           Int
+  preco             Int
+  capacidadeMaxima  Int           @default(1)
+  tempoBuffer       Int           @default(0) // Tempo de preparo em minutos
+  ativo             Boolean       @default(true)
+  empresaId         String
+  agendamentos      Agendamento[]
+  empresa           Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 
   @@map("servicos")
 }
@@ -103,6 +145,7 @@ model Agendamento {
   servico        Servico           @relation(fields: [servicoId], references: [id])
   transacao      Transacao?
   adicionais     Adicional[]       @relation("AdicionalToAgendamento")
+  respostasExtras Json?
 
   @@map("agendamentos")
 }
@@ -138,6 +181,22 @@ model Transacao {
   @@map("transacoes")
 }
 
+model Cupom {
+  id           String   @id @default(uuid())
+  codigo       String   @unique
+  desconto     Int      // Valor em porcentagem ou centavos
+  tipo         String   @default("PERCENTUAL") // PERCENTUAL ou FIXO
+  validade     DateTime?
+  status       String   @default("ATIVO") // ATIVO, INATIVO
+  usos         Int      @default(0)
+  limiteUso    Int      @default(0) // 0 = ilimitado
+  empresaId    String
+  empresa      Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  criadoEm     DateTime @default(now())
+
+  @@map("cupons")
+}
+
 enum RoleUsuario {
   ADMIN
   DONO
@@ -170,4 +229,55 @@ model BloqueioAgenda {
   profissional   Usuario? @relation(fields: [profissionalId], references: [id], onDelete: SetNull)
 
   @@map("bloqueios_agenda")
+}
+
+model LogAuditoria {
+  id          String    @id @default(uuid())
+  dataHora    DateTime  @default(now())
+  usuario     String    // Nome ou email do autor
+  acao        String    // Descrição (ex: "Excluiu agendamento")
+  tipo        String    @default("INFO") // INFO, WARNING, DANGER
+  empresaId   String
+  empresa     Empresa   @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@map("logs_auditoria")
+}
+
+model ChamadoSuporte {
+  id          String    @id @default(uuid())
+  assunto     String
+  mensagem    String
+  status      String    @default("ABERTO") // ABERTO, EM_ANDAMENTO, FECHADO
+  prioridade  String    @default("NORMAL")
+  empresaId   String
+  empresa     Empresa   @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  criadoEm    DateTime  @default(now())
+
+  @@map("chamados_suporte")
+}
+
+model CampoFormulario {
+  id          String   @id @default(uuid())
+  label       String   // Pergunta, ex: "Raça do Pet" ou "Placa do Veículo"
+  tipo        String   @default("TEXT") // TEXT, NUMBER, SELECT
+  opcoes      Json?    // Opções se for SELECT (ex: ["Pequeno", "Médio", "Grande"])
+  obrigatorio Boolean  @default(false)
+  ativo       Boolean  @default(true)
+  empresaId   String
+  empresa     Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@map("campos_formulario")
+}
+
+model Notificacao {
+  id          String   @id @default(uuid())
+  titulo      String
+  mensagem    String
+  lida        Boolean  @default(false)
+  tipo        String   @default("INFO") // INFO, SUCCESS, WARNING, DANGER
+  empresaId   String
+  empresa     Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  criadoEm    DateTime @default(now())
+
+  @@map("notificacoes")
 }

@@ -8,7 +8,7 @@ const PORTA = process.env.PORTA || 3001;
 // Configuração de CORS - Previne erro de CORS mostrado na imagem anterior
 app.use(cors({
   origin: 'http://localhost:3000', // Porta padrão do nosso Vite
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 

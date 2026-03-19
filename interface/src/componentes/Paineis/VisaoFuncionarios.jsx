@@ -7,8 +7,11 @@ import {
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3001/api/negocio/profissionais';
+import { useTermos } from '../../hooks/useTermos';
 
-export default function VisaoFuncionarios({ empresaId }) {
+export default function VisaoFuncionarios({ empresa }) {
+  const empresaId = empresa?.id;
+  const t = useTermos(empresa);
   const [funcionarios, setFuncionarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState('');
@@ -178,14 +181,14 @@ export default function VisaoFuncionarios({ empresaId }) {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-800">Gestão da Equipe</h1>
-          <p className="text-slate-500 font-medium">Cadastre profissionais e defina seus acessos mobile.</p>
+          <h1 className="text-2xl font-black text-slate-800">Equipe de {t.Profissionais}</h1>
+          <p className="text-slate-500 font-medium">Gerencie seus {t.profissionais} e defina seus acessos.</p>
         </div>
         <button 
           onClick={() => abrirModal()}
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black text-sm shadow-lg shadow-indigo-100 flex items-center gap-2 transition-all active:scale-95"
         >
-          <Plus size={20}/> Novo Profissional
+          <Plus size={20}/> Novo {t.Profissional}
         </button>
       </div>
 
@@ -212,8 +215,8 @@ export default function VisaoFuncionarios({ empresaId }) {
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
             <UserCheck size={40} />
           </div>
-          <h3 className="text-lg font-black text-slate-800">Nenhum profissional</h3>
-          <p className="text-slate-400 max-w-xs">Adicione barbeiros e profissionais para começarem a usar a agenda.</p>
+          <h3 className="text-lg font-black text-slate-800">Nenhum {t.profissional}</h3>
+          <p className="text-slate-400 max-w-xs">Adicione seus {t.profissionais} para começarem a usar a agenda.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -226,7 +229,7 @@ export default function VisaoFuncionarios({ empresaId }) {
                   </div>
                   <div>
                     <h3 className="font-black text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{f.nome}</h3>
-                    <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{f.role || 'Profissional'}</span>
+                    <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{f.role === 'PROFISSIONAL' ? t.Profissional : f.role}</span>
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -418,7 +421,7 @@ export default function VisaoFuncionarios({ empresaId }) {
                      disabled={estaSalvando}
                      className="flex-[2] px-6 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 transition-all active:scale-95 text-sm uppercase tracking-widest disabled:bg-slate-200"
                   >
-                     {estaSalvando ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {editando ? 'Salvar Acesso' : 'Criar Profissional'}</>}
+                     {estaSalvando ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {editando ? 'Salvar Acesso' : `Criar ${t.Profissional}`}</>}
                   </button>
                </div>
             </form>

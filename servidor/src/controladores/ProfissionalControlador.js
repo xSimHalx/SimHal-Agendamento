@@ -32,6 +32,26 @@ const ProfissionalControlador = {
     try {
       const { nome, foto, empresaId, email, telefone, senha, horariosDeTrabalho } = req.body;
       
+      // -- VERIFICAÇÃO DE LIMITES POR PLANO --
+      const { obterConfigPlano } = require('../utilitarios/PlanosConfig');
+      const empresa = await prisma.empresa.findUnique({
+        where: { id: empresaId },
+        select: { plano: true }
+      });
+      const configPlano = obterConfigPlano(empresa?.plano);
+      
+      const totalAtual = await prisma.usuario.count({
+        where: { empresaId, isProfissional: true }
+      });
+
+      if (totalAtual >= configPlano.maxProfissionais) {
+        return res.status(403).json({ 
+          erro: `Limite do Plano Atingido`, 
+          detalhe: `Seu plano (${configPlano.nome}) permite apenas ${configPlano.maxProfissionais} profissional(is). Faça um upgrade para adicionar mais.` 
+        });
+      }
+      // ----------------------------------------
+
       const senhaHash = await bcrypt.hash(senha, 10);
       
       const novo = await prisma.usuario.create({

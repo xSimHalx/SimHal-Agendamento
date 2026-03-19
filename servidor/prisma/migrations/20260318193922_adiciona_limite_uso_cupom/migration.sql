@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "cupons" ADD COLUMN     "limiteUso" INTEGER NOT NULL DEFAULT 0,
+ALTER COLUMN "validade" DROP NOT NULL;
