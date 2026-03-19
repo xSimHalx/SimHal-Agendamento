@@ -12,27 +12,27 @@ const PLANOS_CONFIG = {
     permiteCheckout: false,
     permiteMarketing: false
   },
-  STARTER: {
-    nome: 'Starter',
-    maxProfissionais: 3,
+  BRONZE: {
+    nome: 'Bronze',
+    maxProfissionais: 1,
     maxServicos: 10,
     maxAgendamentosMes: 150,
     permiteCheckout: true,
     permiteMarketing: false
   },
-  PRO: {
-    nome: 'Pro',
-    maxProfissionais: 10,
+  GOLD: {
+    nome: 'Gold',
+    maxProfissionais: 5,
     maxServicos: 30,
     maxAgendamentosMes: 1000,
     permiteCheckout: true,
     permiteMarketing: true
   },
-  PREMIUM: {
-    nome: 'Premium',
-    maxProfissionais: 9999, // Ilimitado
-    maxServicos: 9999,      // Ilimitado
-    maxAgendamentosMes: 99999, // Ilimitado
+  DIAMOND: {
+    nome: 'Diamond',
+    maxProfissionais: 999999, // Ilimitado
+    maxServicos: 999999,      // Ilimitado
+    maxAgendamentosMes: 999999, // Ilimitado
     permiteCheckout: true,
     permiteMarketing: true
   }

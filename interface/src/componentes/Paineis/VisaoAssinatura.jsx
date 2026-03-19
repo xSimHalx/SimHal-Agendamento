@@ -9,34 +9,37 @@ import API_URL from '../../servicos/api';
 
 const PLANOS = [
     {
-        id: 'starter',
-        nome: 'Starter',
-        preco: 'Grátis',
-        periodo: 'para sempre',
-        descricao: 'Para quem está começando agora e precisa do básico.',
-        recursos: ['Até 50 agendamentos/mês', '1 Profissional', 'Link público básico', 'Suporte por e-mail'],
+        id: 'bronze', // Mapeado para BRONZE no backend
+        nome: 'Bronze',
+        preco: 'R$ 39,90',
+        precoOriginal: 'R$ 49,90',
+        periodo: '/mês',
+        descricao: 'Ideal para profissionais individuais que estão começando.',
+        recursos: ['1 Profissional', 'Agenda Online', 'Gestão de Clientes', 'Suporte por e-mail'],
         recomendado: false,
-        cor: 'slate'
+        cor: 'amber'
     },
     {
-        id: 'pro',
-        nome: 'Pro',
-        preco: 'R$ 89,90',
+        id: 'gold', // Mapeado para GOLD no backend
+        nome: 'Gold',
+        preco: 'R$ 71,90',
+        precoOriginal: 'R$ 89,90',
         periodo: '/mês',
         descricao: 'A escolha ideal para barbearias em crescimento.',
-        recursos: ['Agendamentos ilimitados', 'Até 5 Profissionais', 'Lembretes no WhatsApp', 'Dashboard Financeiro', 'Suporte Prioritário'],
+        recursos: ['Até 5 Profissionais', 'Relatórios Financeiros', 'Cores Customizadas', 'Suporte Prioritário'],
         recomendado: true,
-        cor: 'indigo'
+        cor: 'amber'
     },
     {
-        id: 'premium',
-        nome: 'Premium',
-        preco: 'R$ 149,90',
+        id: 'diamond', // Mapeado para DIAMOND no backend
+        nome: 'Diamond',
+        preco: 'R$ 119,90',
+        precoOriginal: 'R$ 149,90',
         periodo: '/mês',
-        descricao: 'Para redes e negócios que precisam de poder total.',
-        recursos: ['Tudo do plano Pro', 'Profissionais ilimitados', 'Múltiplas unidades (Lojas)', 'API e Integrações', 'Gerente de Sucesso'],
+        descricao: 'Poder total: Automação e profissionais ilimitados.',
+        recursos: ['Profissionais Ilimitados', 'Automação WhatsApp (Em breve)', 'Dashboards Avançados', 'Gerente de Sucesso'],
         recomendado: false,
-        cor: 'emerald'
+        cor: 'indigo'
     }
 ];
 
@@ -86,7 +89,12 @@ export default function VisaoAssinatura({ empresaId }) {
         );
     }
 
-    const planoAtual = dados?.plano?.toLowerCase() || 'trial';
+    const planoBruto = dados?.plano?.toLowerCase() || 'trial';
+    const planoAtual = {
+        'starter': 'bronze',
+        'pro': 'gold',
+        'premium': 'diamond'
+    }[planoBruto] || planoBruto;
 
     return (
         <div className="p-6 space-y-6 animate-in fade-in duration-500 pb-20">
@@ -133,9 +141,9 @@ export default function VisaoAssinatura({ empresaId }) {
                             </div>
                             <h2 className="text-4xl md:text-5xl font-black tracking-tight uppercase">SimHal {planoAtual}</h2>
                             <p className="text-indigo-200 font-medium max-w-md">
-                                {planoAtual === 'pro' ? 'Você está no plano ideal para negócios em crescimento.' : 
-                                 planoAtual === 'premium' ? 'Você tem o poder total do SimHal nas mãos.' :
-                                 'Aproveite os recursos básicos para digitalizar seu negócio.'}
+                                {planoAtual === 'gold' ? 'Sua barbearia está crescendo com o poder do Gold.' : 
+                                 planoAtual === 'diamond' ? 'Você tem o poder total (incluindo WhatsApp) nas mãos.' :
+                                 'O plano essencial para quem busca profissionalismo.'}
                             </p>
                         </div>
 
@@ -143,8 +151,11 @@ export default function VisaoAssinatura({ empresaId }) {
                             <p className="text-[10px] uppercase tracking-widest text-indigo-200 font-black mb-1">Próxima Cobrança</p>
                             <div className="flex items-end gap-2 mb-4">
                                 <span className="text-3xl font-black">
-                                    {planoAtual === 'pro' ? 'R$ 89,90' : planoAtual === 'premium' ? 'R$ 149,90' : 'Grátis'}
+                                    {planoAtual === 'bronze' ? 'R$ 39,90' : 
+                                     planoAtual === 'gold' ? 'R$ 71,90' : 
+                                     planoAtual === 'diamond' ? 'R$ 119,90' : 'Grátis'}
                                 </span>
+                                <span className="text-xs text-indigo-300 mb-1 font-bold">/mês</span>
                             </div>
                             <div className="flex items-center gap-3 text-sm text-indigo-100 font-medium border-t border-white/10 pt-4 mb-4">
                                 <CalendarDays size={16} /> {dados?.dataVencimento ? new Date(dados.dataVencimento).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Vencimento não definido'}
@@ -204,9 +215,15 @@ export default function VisaoAssinatura({ empresaId }) {
                                         <p className="text-xs text-slate-500 font-medium mt-1 h-10">{plano.descricao}</p>
                                     </div>
 
-                                    <div className="mb-6 flex items-baseline gap-1">
-                                        <span className="text-4xl font-black text-slate-900">{plano.preco}</span>
-                                        <span className="text-sm text-slate-500 font-bold">{plano.periodo}</span>
+                                    <div className="mb-6 flex flex-col">
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-4xl font-black text-slate-900">{plano.preco}</span>
+                                            <span className="text-sm text-slate-500 font-bold">{plano.periodo}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-xs text-slate-400 line-through font-bold">{plano.precoOriginal}</span>
+                                            <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-wider">Beta -20%</span>
+                                        </div>
                                     </div>
 
                                     <button

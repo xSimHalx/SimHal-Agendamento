@@ -14,7 +14,7 @@ async function main() {
       nome: 'Barbearia SimHal SaaS',
       slug: 'barbearia-simhal',
       telefone: '(11) 99999-8888',
-      plano: 'PREMIUM',
+      plano: 'DIAMOND',
       statusAssinatura: 'ATIVO',
       horarioFuncionamento: {
         segunda: ["08:00", "18:00"],

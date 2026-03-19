@@ -42,7 +42,7 @@ export default function VisaoClientes({ empresa }) {
     if (!empresaId) return;
     setCarregando(true);
     try {
-      const response = await axios.get(`${API_URL}/${empresaId}`);
+      const response = await axios.get(`${API_BASE}/${empresaId}`);
       setClientes(Array.isArray(response.data) ? response.data : []);
     } catch (erro) {
       console.error("Erro ao buscar clientes:", erro);
@@ -59,7 +59,7 @@ export default function VisaoClientes({ empresa }) {
     setClienteSelecionado(cliente);
     setDetalhesCarregando(true);
     try {
-      const res = await axios.get(`${API_URL}/detalhes/${cliente.id}`);
+      const res = await axios.get(`${API_BASE}/detalhes/${cliente.id}`);
       setHistorico(res.data.agendamentos || []);
     } catch (erro) {
       console.error("Erro ao buscar detalhes:", erro);
@@ -91,9 +91,9 @@ export default function VisaoClientes({ empresa }) {
     try {
       const dados = { ...form, empresaId };
       if (editando) {
-        await axios.put(`${API_URL}/${editando.id}`, dados);
+        await axios.put(`${API_BASE}/${editando.id}`, dados);
       } else {
-        await axios.post(API_URL, dados);
+        await axios.post(API_BASE, dados);
       }
       setFeedback({ tipo: 'sucesso', msg: `${t.Cliente} salvo com sucesso!` });
       setModalAberto(false);

@@ -67,14 +67,21 @@ class AssinaturaControlador {
       });
 
       // Gerar faturamento fake para o histórico
-      const valorPlano = novoPlano === 'PRO' ? 8990 : novoPlano === 'PREMIUM' ? 14990 : 0;
+      const precosBase = {
+        'BRONZE': 4990,
+        'GOLD': 8990,
+        'DIAMOND': 14990
+      };
+
+      const valorOriginal = precosBase[novoPlano] || 0;
+      const valorComDesconto = Math.floor(valorOriginal * 0.8); // 20% de desconto Beta
       
-      if (valorPlano > 0) {
+      if (valorComDesconto > 0) {
         await prisma.fatura.create({
             data: {
                 empresaId,
                 plano: novoPlano,
-                valor: valorPlano,
+                valor: valorComDesconto,
                 status: 'PAGO',
                 codigo: `FAT-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
             }

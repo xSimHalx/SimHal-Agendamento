@@ -68,7 +68,7 @@ export default function VisaoFuncionarios({ empresa, usuarioLogado, setUsuarioLo
     },
   ];
     try {
-      const response = await axios.get(`${API_URL}/${empresaId}`);
+      const response = await axios.get(`${API_BASE}/${empresaId}`);
       setFuncionarios(Array.isArray(response.data) ? response.data : []);
     } catch (erro) {
       console.error("Erro ao buscar equipe:", erro);
