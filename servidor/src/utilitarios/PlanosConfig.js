@@ -10,31 +10,55 @@ const PLANOS_CONFIG = {
     maxServicos: 3,
     maxAgendamentosMes: 30,
     permiteCheckout: false,
-    permiteMarketing: false
+    permiteMarketing: false,
+    permiteFinanceiro: false,
+    permiteRelatorios: false,
+    permiteIntegracoes: false,
+    permiteAutomacao: false,
+    permiteLandingPage: false,
+    permiteComissoes: false
   },
   BRONZE: {
-    nome: 'Bronze',
+    nome: 'SS Essencial',
     maxProfissionais: 1,
     maxServicos: 10,
     maxAgendamentosMes: 150,
     permiteCheckout: true,
-    permiteMarketing: false
+    permiteMarketing: false,
+    permiteFinanceiro: false,
+    permiteRelatorios: false,
+    permiteIntegracoes: false,
+    permiteAutomacao: false,
+    permiteLandingPage: false,
+    permiteComissoes: false
   },
   GOLD: {
-    nome: 'Gold',
+    nome: 'SS Premium',
     maxProfissionais: 5,
     maxServicos: 30,
     maxAgendamentosMes: 1000,
     permiteCheckout: true,
-    permiteMarketing: true
+    permiteMarketing: false,
+    permiteFinanceiro: true,
+    permiteRelatorios: true,
+    permiteIntegracoes: false,
+    permiteAutomacao: false,
+    permiteLandingPage: false,
+    permiteComissoes: true
   },
   DIAMOND: {
-    nome: 'Diamond',
-    maxProfissionais: 999999, // Ilimitado
-    maxServicos: 999999,      // Ilimitado
-    maxAgendamentosMes: 999999, // Ilimitado
+    nome: 'SS Black (Elite)',
+    maxProfissionais: 999999,
+    maxServicos: 999999,
+    maxAgendamentosMes: 999999,
     permiteCheckout: true,
-    permiteMarketing: true
+    permiteMarketing: true,
+    permiteFinanceiro: true,
+    permiteRelatorios: true,
+    permiteIntegracoes: true,
+    permiteAutomacao: true,
+    permiteLandingPage: true,
+    permiteComissoes: true
   }
 };
 
@@ -43,7 +67,16 @@ const PLANOS_CONFIG = {
  */
 function obterConfigPlano(planoNome) {
   const plano = planoNome?.toUpperCase();
-  return PLANOS_CONFIG[plano] || PLANOS_CONFIG.TRIAL;
+  
+  // Mapeamento de compatibilidade (Legacy -> New)
+  const mapa = {
+    'STARTER': 'BRONZE',
+    'PRO': 'DIAMOND', // Pro era o topo, então Black (Elite)
+    'PREMIUM': 'GOLD' // Premium agora é o plano médio
+  };
+
+  const chaveEfetiva = mapa[plano] || plano;
+  return PLANOS_CONFIG[chaveEfetiva] || PLANOS_CONFIG.TRIAL;
 }
 
 module.exports = {

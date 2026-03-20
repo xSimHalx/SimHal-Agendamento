@@ -93,6 +93,17 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
     }
   };
 
+  const abrirWhatsApp = () => {
+    if (!agendamentoAtivo?.cliente?.telefone) return;
+    const telefone = agendamentoAtivo.cliente.telefone.replace(/\D/g, '');
+    const data = format(new Date(agendamentoAtivo.dataHora), "dd/MM 'às' HH:mm");
+    const texto = `Olá ${agendamentoAtivo.cliente.nome}, aqui é da ${empresa.nome}. Gostaria de conversar sobre seu agendamento de ${agendamentoAtivo.servico.nome} no dia ${data}.`;
+    
+    // Abre no WhatsApp (assumindo código de área 55 se não houver)
+    const link = telefone.length <= 11 ? `55${telefone}` : telefone;
+    window.open(`https://wa.me/${link}?text=${encodeURIComponent(texto)}`, '_blank');
+  };
+
   const excluirBloqueio = async (id) => {
     if (!window.confirm("Deseja remover este bloqueio e liberar o horário?")) return;
     try {
@@ -407,7 +418,10 @@ export default function VisaoAgenda({ empresa, profissionalId }) {
             </div>
 
             <div className="p-6 bg-slate-50 border-t border-slate-100">
-               <button className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-black shadow-lg shadow-emerald-100 transition-all active:scale-95">
+               <button 
+                 onClick={abrirWhatsApp}
+                 className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-black shadow-lg shadow-emerald-100 transition-all active:scale-95"
+               >
                   <MessageSquare size={20} /> Conversar no WhatsApp
                </button>
             </div>

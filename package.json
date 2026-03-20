@@ -4,7 +4,8 @@
   "description": "Projeto SimHal Agendamento - Root",
   "workspaces": [
     "interface",
-    "servidor"
+    "servidor",
+    "site-oficial"
   ],
   "scripts": {
     "build": "npm run build --workspace=interface",

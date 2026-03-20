@@ -292,9 +292,19 @@ export default function VisaoClientes({ empresa }) {
                     <Phone size={14} /> Informações de Contato
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <p className="text-[10px] font-black text-slate-400 mb-1">WhatsApp</p>
-                      <p className="text-sm font-bold text-slate-800">{clienteSelecionado.telefone}</p>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center group/wa">
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 mb-1 uppercase tracking-widest">WhatsApp</p>
+                        <p className="text-sm font-bold text-slate-800">{clienteSelecionado.telefone}</p>
+                      </div>
+                      <a 
+                        href={`https://wa.me/55${clienteSelecionado.telefone.replace(/\D/g, '')}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="p-2 bg-emerald-100 text-emerald-600 rounded-xl hover:bg-emerald-500 hover:text-white transition-all"
+                      >
+                        <Phone size={16} />
+                      </a>
                     </div>
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       <p className="text-[10px] font-black text-slate-400 mb-1">E-mail</p>

@@ -102,9 +102,9 @@ export default function VisaoIntegracoes({ empresaId }) {
         }
     };
 
-    const salvarToggles = async () => {
+    const salvarToggles = async (novoEstado) => {
         try {
-            await axios.put(`${API_BASE}/info/${empresaId}`, form);
+            await axios.put(`${API_BASE}/info/${empresaId}`, novoEstado);
             setSucesso(true);
             setTimeout(() => setSucesso(false), 3000);
         } catch (e) {
@@ -214,7 +214,11 @@ export default function VisaoIntegracoes({ empresaId }) {
                                     <p className="text-[10px] text-slate-500 font-medium">Dispara assim que o cliente agendar</p>
                                 </div>
                                 <button 
-                                    onClick={() => { setForm(f => ({...f, msgBoasVindasAtiva: !f.msgBoasVindasAtiva})); salvarToggles(); }}
+                                    onClick={() => { 
+                                        const novo = {...form, msgBoasVindasAtiva: !form.msgBoasVindasAtiva};
+                                        setForm(novo); 
+                                        salvarToggles(novo); 
+                                    }}
                                     className={`w-12 h-6 rounded-full relative transition-all ${form.msgBoasVindasAtiva ? 'bg-emerald-500' : 'bg-slate-700'}`}
                                 >
                                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${form.msgBoasVindasAtiva ? 'left-7' : 'left-1'}`} />
@@ -226,7 +230,11 @@ export default function VisaoIntegracoes({ empresaId }) {
                                     <p className="text-[10px] text-slate-500 font-medium">Reduza as faltas dos clientes</p>
                                 </div>
                                 <button 
-                                    onClick={() => { setForm(f => ({...f, msgLembreteAtiva: !f.msgLembreteAtiva})); salvarToggles(); }}
+                                    onClick={() => { 
+                                        const novo = {...form, msgLembreteAtiva: !form.msgLembreteAtiva};
+                                        setForm(novo); 
+                                        salvarToggles(novo); 
+                                    }}
                                     className={`w-12 h-6 rounded-full relative transition-all ${form.msgLembreteAtiva ? 'bg-emerald-500' : 'bg-slate-700'}`}
                                 >
                                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${form.msgLembreteAtiva ? 'left-7' : 'left-1'}`} />

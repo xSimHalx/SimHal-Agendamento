@@ -58,6 +58,15 @@ export default function VisaoFuncionarios({ empresa, usuarioLogado, setUsuarioLo
    // Notas da versão
   const releaseNotes = [
     {
+      version: "1.2.7",
+      date: "2026-03-19",
+      notes: [
+        "Correção de bug de estado assíncrono nos toggles de WhatsApp",
+        "Implementação de botão de contato direto via WhatsApp no CRM de Clientes",
+        "Revisão completa de integridade de botões em todos os painéis administrativos"
+      ]
+    },
+    {
       version: "1.2.6",
       date: "2026-03-19",
       notes: [

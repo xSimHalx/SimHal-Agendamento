@@ -2,44 +2,65 @@ import React, { useState, useEffect } from 'react';
 import {
     CreditCard, CheckCircle2, Zap, Download,
     ShieldCheck, Crown, AlertCircle, CalendarDays,
-    ArrowRight, Loader2
+    ArrowRight, Loader2, QrCode, ClipboardCheck
 } from 'lucide-react';
 import axios from 'axios';
 import API_URL from '../../servicos/api';
 
 const PLANOS = [
     {
-        id: 'bronze', // Mapeado para BRONZE no backend
-        nome: 'Bronze',
-        preco: 'R$ 39,90',
-        precoOriginal: 'R$ 49,90',
+        id: 'bronze',
+        nome: 'SS Essencial',
+        preco: 'R$ 49,90',
+        precoOriginal: 'R$ 51,90',
         periodo: '/mês',
-        descricao: 'Ideal para profissionais individuais que estão começando.',
-        recursos: ['1 Profissional', 'Agenda Online', 'Gestão de Clientes', 'Suporte por e-mail'],
-        recomendado: false,
-        cor: 'amber'
+        descricao: 'O plano ideal para quem atende sozinho.',
+        recursos: [
+            '1 Profissional / Cadeira',
+            'Agenda Online 24/7',
+            'CRM de Clientes Básico',
+            'Painel de Controle',
+            'Suporte via Chat'
+        ],
+        recommended: false,
+        cor: 'slate',
+        icone: <Zap className="text-slate-400" size={32} />
     },
     {
-        id: 'gold', // Mapeado para GOLD no backend
-        nome: 'Gold',
-        preco: 'R$ 71,90',
-        precoOriginal: 'R$ 89,90',
+        id: 'gold',
+        nome: 'SS Premium',
+        preco: 'R$ 55,90',
+        precoOriginal: 'R$ 119,90',
         periodo: '/mês',
-        descricao: 'A escolha ideal para barbearias em crescimento.',
-        recursos: ['Até 5 Profissionais', 'Relatórios Financeiros', 'Cores Customizadas', 'Suporte Prioritário'],
-        recomendado: true,
-        cor: 'amber'
+        descricao: 'Gestão de equipe e controle financeiro total.',
+        recursos: [
+            'Até 5 Profissionais',
+            'Financeiro & Caixa',
+            'Cálculo de Comissões',
+            'Relatórios de Performance',
+            'Cores da sua Marca'
+        ],
+        recommended: true,
+        cor: 'amber',
+        icone: <Crown className="text-amber-500" size={32} />
     },
     {
-        id: 'diamond', // Mapeado para DIAMOND no backend
-        nome: 'Diamond',
-        preco: 'R$ 119,90',
+        id: 'diamond',
+        nome: 'SS Black (Elite)',
+        preco: 'R$ 119,00',
         precoOriginal: 'R$ 149,90',
         periodo: '/mês',
-        descricao: 'Poder total: Automação e profissionais ilimitados.',
-        recursos: ['Profissionais Ilimitados', 'Automação WhatsApp (Em breve)', 'Dashboards Avançados', 'Gerente de Sucesso'],
-        recomendado: false,
-        cor: 'indigo'
+        descricao: 'Poder máximo, automação e site exclusivo.',
+        recursos: [
+            'Profissionais Ilimitados',
+            'Mini Site / Landing Page',
+            'Automação de WhatsApp',
+            'Marketing (Fidelidade)',
+            'Checkout Builder & API'
+        ],
+        recommended: false,
+        cor: 'dark',
+        icone: <ShieldCheck className="text-indigo-400" size={32} />
     }
 ];
 
@@ -48,6 +69,8 @@ export default function VisaoAssinatura({ empresaId }) {
     const [carregando, setCarregando] = useState(true);
     const [abaAtiva, setAbaAtiva] = useState('visao_geral');
     const [upgrading, setUpgrading] = useState(false);
+    const [showModalPagamento, setShowModalPagamento] = useState(false);
+    const [planoSelecionado, setPlanoSelecionado] = useState(null);
 
     const carregarDados = async () => {
         try {
@@ -65,14 +88,20 @@ export default function VisaoAssinatura({ empresaId }) {
         if (empresaId) carregarDados();
     }, [empresaId]);
 
-    const fazerUpgrade = async (novoPlano) => {
+    const iniciarUpgrade = (plano) => {
+        setPlanoSelecionado(plano);
+        setShowModalPagamento(true);
+    };
+
+    const confirmarPagamento = async () => {
         try {
             setUpgrading(true);
+            setShowModalPagamento(false);
             await axios.patch(`${API_URL}/api/negocio/assinatura/plano/${empresaId}`, {
-                novoPlano: novoPlano.toUpperCase()
+                novoPlano: planoSelecionado.id.toUpperCase()
             });
             await carregarDados();
-            alert(`Plano ${novoPlano} ativado com sucesso!`);
+            alert(`Plano ${planoSelecionado.nome} ativado com sucesso!`);
         } catch (erro) {
             alert("Erro ao realizar upgrade.");
         } finally {
@@ -95,6 +124,13 @@ export default function VisaoAssinatura({ empresaId }) {
         'pro': 'gold',
         'premium': 'diamond'
     }[planoBruto] || planoBruto;
+
+    const nomesExibicao = {
+        'bronze': 'SS Essencial',
+        'gold': 'SS Premium',
+        'diamond': 'SS Black (Elite)',
+        'trial': 'Período de Teste'
+    };
 
     return (
         <div className="p-6 space-y-6 animate-in fade-in duration-500 pb-20">
@@ -139,11 +175,11 @@ export default function VisaoAssinatura({ empresaId }) {
                             <div className="inline-flex items-center gap-1.5 bg-indigo-800/50 border border-indigo-700 px-3 py-1 rounded-full text-xs font-black tracking-widest text-indigo-200 uppercase">
                                 <ShieldCheck size={14} /> Plano Ativo
                             </div>
-                            <h2 className="text-4xl md:text-5xl font-black tracking-tight uppercase">SimHal {planoAtual}</h2>
-                            <p className="text-indigo-200 font-medium max-w-md">
-                                {planoAtual === 'gold' ? 'Sua barbearia está crescendo com o poder do Gold.' : 
-                                 planoAtual === 'diamond' ? 'Você tem o poder total (incluindo WhatsApp) nas mãos.' :
-                                 'O plano essencial para quem busca profissionalismo.'}
+                            <h2 className="text-2xl md:text-5xl font-black tracking-tight uppercase">SimHal {nomesExibicao[planoAtual] || planoAtual}</h2>
+                            <p className="text-indigo-200 font-medium max-w-md italic">
+                                {planoAtual === 'gold' ? 'Sua barbearia está crescendo com o poder do nível Premium.' : 
+                                 planoAtual === 'diamond' ? 'Poder total: Você está no topo com o nível Black.' :
+                                 'O nível Essencial para quem busca profissionalismo e organização.'}
                             </p>
                         </div>
 
@@ -199,36 +235,46 @@ export default function VisaoAssinatura({ empresaId }) {
                             {PLANOS.map((plano) => (
                                 <div
                                     key={plano.id}
-                                    className={`p-8 rounded-[2.5rem] border-2 relative flex flex-col transition-all ${planoAtual === plano.id
-                                            ? 'border-indigo-600 bg-indigo-50/30'
-                                            : 'border-slate-100 bg-white hover:border-slate-200'
-                                        } ${plano.recomendado && planoAtual !== plano.id ? 'shadow-xl shadow-indigo-100/50 border-indigo-200' : ''}`}
+                                    className={`p-8 rounded-[2.5rem] border-2 relative flex flex-col transition-all ${
+                                        plano.id === 'diamond' 
+                                            ? 'bg-slate-900 border-slate-800 text-white shadow-2xl' 
+                                            : planoAtual === plano.id
+                                                ? 'border-indigo-600 bg-indigo-50/30'
+                                                : 'border-slate-100 bg-white hover:border-slate-200 shadow-sm'
+                                    } ${plano.recomendado && planoAtual !== plano.id ? 'shadow-xl shadow-indigo-100/50 border-indigo-200' : ''}`}
                                 >
                                     {plano.recomendado && (
-                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm z-10">
                                             Mais Popular
                                         </div>
                                     )}
 
-                                    <div className="mb-6">
-                                        <h4 className="text-2xl font-black text-slate-800">{plano.nome}</h4>
-                                        <p className="text-xs text-slate-500 font-medium mt-1 h-10">{plano.descricao}</p>
+                                    <div className="mb-6 flex justify-between items-start">
+                                        <div>
+                                            <h4 className={`text-2xl font-black ${plano.id === 'diamond' ? 'text-white' : 'text-slate-800'}`}>{plano.nome}</h4>
+                                            <p className={`text-xs font-medium mt-1 h-10 ${plano.id === 'diamond' ? 'text-slate-400' : 'text-slate-500'}`}>{plano.descricao}</p>
+                                        </div>
+                                        <div className={`p-3 rounded-2xl ${plano.id === 'diamond' ? 'bg-slate-800' : 'bg-slate-50'}`}>
+                                            {plano.icone}
+                                        </div>
                                     </div>
 
                                     <div className="mb-6 flex flex-col">
                                         <div className="flex items-baseline gap-2">
-                                            <span className="text-4xl font-black text-slate-900">{plano.preco}</span>
-                                            <span className="text-sm text-slate-500 font-bold">{plano.periodo}</span>
+                                            <span className={`text-4xl font-black ${plano.id === 'diamond' ? 'text-white' : 'text-slate-900'}`}>{plano.preco}</span>
+                                            <span className={`text-sm font-bold ${plano.id === 'diamond' ? 'text-slate-400' : 'text-slate-500'}`}>{plano.periodo}</span>
                                         </div>
                                         <div className="flex items-center gap-2 mt-1">
                                             <span className="text-xs text-slate-400 line-through font-bold">{plano.precoOriginal}</span>
-                                            <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-wider">Beta -20%</span>
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                                                plano.id === 'diamond' ? 'bg-indigo-500 text-white' : 'bg-emerald-50 text-emerald-500'
+                                            }`}>Beta -20%</span>
                                         </div>
                                     </div>
 
                                     <button
                                         disabled={planoAtual === plano.id || upgrading}
-                                        onClick={() => fazerUpgrade(plano.id)}
+                                        onClick={() => iniciarUpgrade(plano)}
                                         className={`w-full py-3 rounded-xl font-black text-sm transition-all mb-8 ${planoAtual === plano.id
                                                 ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
                                                 : plano.recomendado
@@ -241,11 +287,15 @@ export default function VisaoAssinatura({ empresaId }) {
                                     </button>
 
                                     <div className="space-y-4 mt-auto">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">O que está incluso</p>
+                                        <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${plano.id === 'diamond' ? 'text-slate-500' : 'text-slate-400'}`}>O que está incluso</p>
                                         {plano.recursos.map((recurso, idx) => (
                                             <div key={idx} className="flex items-start gap-3">
-                                                <CheckCircle2 size={18} className={`shrink-0 ${planoAtual === plano.id ? 'text-indigo-600' : 'text-slate-400'}`} />
-                                                <span className="text-sm font-bold text-slate-600">{recurso}</span>
+                                                <CheckCircle2 size={18} className={`shrink-0 ${
+                                                    plano.id === 'diamond' 
+                                                        ? 'text-indigo-400' 
+                                                        : planoAtual === plano.id ? 'text-indigo-600' : 'text-slate-400'
+                                                }`} />
+                                                <span className={`text-sm font-bold ${plano.id === 'diamond' ? 'text-slate-300' : 'text-slate-600'}`}>{recurso}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -310,6 +360,58 @@ export default function VisaoAssinatura({ empresaId }) {
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal de Pagamento PIX */}
+            {showModalPagamento && planoSelecionado && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-300">
+                        <div className="text-center space-y-4">
+                            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                <QrCode size={32} />
+                            </div>
+                            <h3 className="text-2xl font-black text-slate-800">Pagamento via PIX</h3>
+                            <p className="text-sm text-slate-500 font-medium italic">Plano: <span className="text-indigo-600 font-bold uppercase">{planoSelecionado.nome}</span></p>
+                            
+                            {/* QR Code Fictício */}
+                            <div className="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200 aspect-square flex items-center justify-center relative group overflow-hidden">
+                                <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-800">Demonstração</p>
+                                </div>
+                                <img 
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=SimHalPaymentsMockPIX_${planoSelecionado.id}`} 
+                                    alt="QR Code PIX"
+                                    className="w-48 h-48 mix-blend-multiply opacity-80"
+                                />
+                            </div>
+
+                            <div className="bg-indigo-50 p-4 rounded-2xl flex items-center justify-between gap-4 border border-indigo-100">
+                                <div className="text-left overflow-hidden">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-0.5">PIX Copia e Cola</p>
+                                    <p className="text-xs font-bold text-indigo-900 truncate">00020126330014BR.GOV.BCB.PIX0111SimHalSaaSApp...</p>
+                                </div>
+                                <button className="p-2 bg-white text-indigo-600 rounded-lg shadow-sm hover:bg-indigo-600 hover:text-white transition-all">
+                                    <ClipboardCheck size={18} />
+                                </button>
+                            </div>
+
+                            <div className="pt-6 grid grid-cols-2 gap-3">
+                                <button 
+                                    onClick={() => setShowModalPagamento(false)}
+                                    className="py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-black text-sm transition-all"
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    onClick={confirmarPagamento}
+                                    className="py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-100 transition-all flex items-center justify-center gap-2"
+                                >
+                                    Já Paguei <ArrowRight size={16} />
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-4">O sistema reconhecerá o pagamento em até 1 minuto.</p>
                         </div>
                     </div>
                 </div>

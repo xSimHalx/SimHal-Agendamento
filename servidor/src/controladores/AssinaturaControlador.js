@@ -33,8 +33,8 @@ class AssinaturaControlador {
         where: { empresaId, dataHora: { gte: inicioMes }, status: { not: 'CANCELADO' } }
       });
 
-      const { PLANOS_CONFIG } = require('../utilitarios/PlanosConfig');
-      const limites = PLANOS_CONFIG[empresa.plano] || PLANOS_CONFIG.TRIAL;
+      const { obterConfigPlano } = require('../utilitarios/PlanosConfig');
+      const limites = obterConfigPlano(empresa.plano);
 
       return res.json({
         ...empresa,

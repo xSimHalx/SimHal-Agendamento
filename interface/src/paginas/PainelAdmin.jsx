@@ -120,9 +120,33 @@ function MenuLateral({ abaAtiva, setAbaAtiva, estaAberto, setEstaAberto, usuario
   const t = useTermos(usuario?.empresa);
   
   const itensFiltrados = ITENS_MENU.filter(item => {
+    // 1. Filtro por Role (Funcionário vê menos)
     if (usuario?.role === 'PROFISSIONAL') {
-      return ['agenda', 'suporte'].includes(item.id);
+      return ['agenda', 'suporte', 'clientes'].includes(item.id);
     }
+    
+    // 2. Filtro por Plano (Restrições SaaS)
+    const planoRaw = usuario?.empresa?.plano?.toUpperCase() || 'TRIAL';
+    
+    // Mapeamento de Compatibilidade
+    const mapa = {
+      'STARTER': 'BRONZE',
+      'PRO': 'DIAMOND', // Conforme tabela de preços: Pro é o plano mais alto (119+)
+      'PREMIUM': 'GOLD'  // Premium agora é o plano médio (55+)
+    };
+    
+    const plano = mapa[planoRaw] || planoRaw;
+    
+    // SS Essencial (BRONZE) - Não vê Financeiro, Relatórios, Marketing, Integrações, Automacao, Auditoria
+    if (plano === 'BRONZE') {
+      if (['financeiro', 'relatorios', 'marketing', 'integracoes', 'automacao', 'auditoria'].includes(item.id)) return false;
+    }
+    
+    // SS Premium (GOLD) - Não vê Marketing, Integrações, Automacao, Auditoria
+    if (plano === 'GOLD') {
+      if (['marketing', 'integracoes', 'automacao', 'auditoria'].includes(item.id)) return false;
+    }
+
     return true;
   });
 
